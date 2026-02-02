@@ -2,6 +2,8 @@ import React from 'react'
 import Hero from '../components/Layout/Hero'
 import NewArrivals from '../components/Products/NewArrivals'
 import ProductDetails from '../components/Products/ProductDetails'
+import FeaturedCollection from '../components/Products/FeaturedCollection'
+import FeaturesSection from '../components/Products/FeaturesSection'
 
 function Home() {
   return (
@@ -12,6 +14,8 @@ function Home() {
     {/* Featured Products */}
     <h2 className="text-3xl text-center font-bold mb-4">Featured Products</h2>
     <ProductDetails />
+    <FeaturedCollection />
+    <FeaturesSection />
     </>
   )
 }

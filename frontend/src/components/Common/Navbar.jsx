@@ -26,13 +26,13 @@ const Navbar = () => {
             </div>
             {/* Center nav link */}
             <div className='hidden md:flex space-x-6'>
-                <Link to='#' className="text-gray-700 text-sm font-medium uppercase 
+                <Link to='/' className="text-gray-700 text-sm font-medium uppercase 
                 px-3 py-0.5 rounded-md 
                 transition-all duration-200
                 hover:text-black hover:bg-white hover:shadow-md">
                     Home
                 </Link>
-                <Link to='#' className="text-gray-700 text-sm font-medium uppercase 
+                <Link to='collections/all' className="text-gray-700 text-sm font-medium uppercase 
                 px-3 py-0.5 rounded-md 
                 transition-all duration-200
                 hover:text-black hover:bg-white hover:shadow-md">
@@ -59,12 +59,18 @@ const Navbar = () => {
                     hover:text-black hover:bg-white hover:shadow-md">
                     Contact Us
                 </Link>
+                <Link to='#' className="text-gray-700 text-sm font-medium uppercase 
+                     px-3 py-0.5 rounded-md 
+                     transition-all duration-200
+                    hover:text-black hover:bg-white hover:shadow-md">
+                    ADMIN
+                </Link>
 
             </div>
 
             {/* Right -Icons */}
             <div className="flex items-center space-x-4">
-                <Link to='/profile' className='hover:text-black'>
+                <Link to='/login' className='hover:text-black'>
                     <User className='h-6 w-6 text-gray-700' />
                 </Link>
                 <button 

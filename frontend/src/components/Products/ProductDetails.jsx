@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import ProductGrid from './ProductGrid';
 
 function ProductDetails() {
     const product = {
@@ -20,11 +22,72 @@ function ProductDetails() {
         ],
     };
 
+    const similarProducts = [
+        {
+            _id:1,
+            name:"Product 1",
+            price:100,
+            images: [{
+                url: "/productImg/Sunflower.jpeg",
+                altText: "Sunflower Crochet Flower",
+            }]
+        },
+        {
+            _id:2,
+            name:"Product 2",
+            price:100,
+            images: [{
+                url: "/productImg/Sunflower.jpeg",
+                altText: "Sunflower Crochet Flower",
+            }]
+        },
+        {
+            _id:3,
+            name:"Product 3",
+            price:100,
+            images: [{
+                url: "/productImg/Sunflower.jpeg",
+                altText: "Sunflower Crochet Flower",
+            }]
+        },
+        {
+            _id:4,
+            name:"Product 4",
+            price:100,
+            images: [{
+                url: "/productImg/Sunflower.jpeg",
+                altText: "Sunflower Crochet Flower",
+            }]
+        },
+    ]
+
     const [mainImage, setMainImage] = useState(product.images[0].url);
     const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
     const [selectedColor, setSelectedColor] = useState(product.colors[0]);
     const [quantity, setQuantity] = useState(1);
     const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
+    useEffect(() => {
+        if (product?.images?.length > 0) {
+            setMainImage(product.images[0].url);
+        }
+    }, [product]);
+
+    const handleAddToCart = () => {
+        if (!selectedSize || !selectedColor) {
+            toast.error("Please Select the size and color beforing adding to cart", {
+                duration: 1000,
+            });
+            return;
+        }
+        setIsButtonDisabled(true);
+        setTimeout(() => {
+            toast.success('Product Added To Cart', {
+                duration: 1000,
+            });
+            setIsButtonDisabled(false);
+        }, 500)
+    }
 
     return (
         <div className="p-6">
@@ -61,7 +124,7 @@ function ProductDetails() {
                                 key={index}
                                 src={img.url}
                                 alt={img.altText}
-                                 className={`w-20 h-20 object-cover rounded-lg cursor-pointer border ${mainImage === img.url ? 'border-black' : 'border-gray-300'}`}
+                                className={`w-20 h-20 object-cover rounded-lg cursor-pointer border ${mainImage === img.url ? 'border-black' : 'border-gray-300'}`}
                                 onClick={() => setMainImage(img.url)}
                             />
                         ))}
@@ -105,10 +168,10 @@ function ProductDetails() {
                                         key={index}
                                         onClick={() => setSelectedColor(color)}
                                         className={`w-8 h-8 rounded-full border ${color === "Red"
-                                                ? "bg-red-500"
-                                                : color === "Yellow"
-                                                    ? "bg-yellow-400"
-                                                    : "bg-blue-500"
+                                            ? "bg-red-500"
+                                            : color === "Yellow"
+                                                ? "bg-yellow-400"
+                                                : "bg-blue-500"
                                             } ${selectedColor === color ? 'border-black' : 'border-gray-300'}`}
                                     />
                                 ))}
@@ -128,10 +191,24 @@ function ProductDetails() {
                                 </button>
                             </div>
                         </div>
-                        <button className="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition">
-                            Add to Cart
+                        <button
+                            className={`w-full bg-gray-900 text-white py-3 rounded-lg
+                            ${isButtonDisabled ? "cursor-not-allowed opacity-50" : "hover:bg-gray-900"}
+                            transition`}
+                            disabled={isButtonDisabled}
+                            onClick={handleAddToCart}
+                        >
+                            {isButtonDisabled ? "Adding..." : "ADD TO CART"}
                         </button>
                     </div>
+                </div>
+
+                {/* You May Also Like Section */}
+                <div className="mt-20">
+                    <h2 className="text-2xl text-center font-medium mb-4">
+                        You May Also Like
+                    </h2>
+                    <ProductGrid products={similarProducts}/>
                 </div>
             </div>
         </div>
