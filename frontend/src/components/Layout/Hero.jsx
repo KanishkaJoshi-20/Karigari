@@ -59,7 +59,7 @@ function Hero() {
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <Link
-              to="#"
+              to="/collections/all"
               className="inline-block bg-white text-gray-950 px-6 py-2 rounded-sm text-lg
                          hover:scale-105 transition-transform duration-300"
             >

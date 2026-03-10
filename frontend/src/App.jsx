@@ -14,15 +14,19 @@ import OrderDetailPage from './pages/OrderDetailPage'
 import MyOrders from './pages/MyOrderPage'
 import AdminLayout from './components/Admin/AdminLayout'
 import AdminHomePage from './pages/AdminHomePage'
+import AdminProductsPage from './pages/AdminProductsPage'
+import AdminOrdersPage from './pages/AdminOrdersPage'
+import AdminUsersPage from './pages/AdminUsersPage'
+import CustomCrochet from './pages/CustomCrochet'
+import AboutUs from './pages/AboutUs'
+import ContactUs from './pages/ContactUs'
 
 function App() {
   return (
     <BrowserRouter> 
       <Toaster position="top-right" />
-    {/* // Client side routing */}
       <Routes>
         <Route path='/' element={<UserLayout />}>
-        {/*User Layout*/}
           <Route index element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -33,12 +37,17 @@ function App() {
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/order/:id" element={<OrderDetailPage />} />
           <Route path="/my-orders" element={<MyOrders />} />
+          <Route path="/custom-crochet" element={<CustomCrochet />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<ContactUs />} />
         </Route>
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<AdminHomePage />} />
+          <Route path="products" element={<AdminProductsPage />} />
+          <Route path="orders" element={<AdminOrdersPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
         </Route>
       </Routes>
-
     </BrowserRouter>
   )
 }

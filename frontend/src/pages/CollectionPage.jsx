@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts } from "../redux/slices/productSlice";
+import { addToCart } from "../redux/slices/cartSlice";
+import { toast } from "sonner";
 import { FaFilter } from "react-icons/fa";
+import { getImageUrl } from "../utils/getImageUrl";
 
 const COLLECTIONS = [
   "All",
@@ -11,7 +16,9 @@ const COLLECTIONS = [
 ];
 
 const CollectionPage = () => {
-  const [products, setProducts] = useState([]);
+  const dispatch = useDispatch();
+  const { products, loading, error } = useSelector((state) => state.products);
+
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const sidebarRef = useRef(null);
@@ -20,76 +27,21 @@ const CollectionPage = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  /* ---------------- MOCK DATA ---------------- */
   useEffect(() => {
-    const fetchedProducts = [
-      {
-        _id: 1,
-        name: "Crochet Teddy Bear",
-        price: 899,
-        category: "Amigurumi Toys",
-        image: "https://picsum.photos/500/500?random=1",
-      },
-      {
-        _id: 2,
-        name: "Crochet Bunny",
-        price: 799,
-        category: "Amigurumi Toys",
-        image: "https://picsum.photos/500/500?random=2",
-      },
-      {
-        _id: 3,
-        name: "Crochet Flower Pot",
-        price: 499,
-        category: "Home Décor",
-        image: "https://picsum.photos/500/500?random=3",
-      },
-      {
-        _id: 4,
-        name: "Crochet Cushion Cover",
-        price: 699,
-        category: "Home Décor",
-        image: "https://picsum.photos/500/500?random=4",
-      },
-      {
-        _id: 5,
-        name: "Crochet Handbag",
-        price: 1299,
-        category: "Accessories",
-        image: "https://picsum.photos/500/500?random=5",
-      },
-      {
-        _id: 6,
-        name: "Crochet Beanie Cap",
-        price: 599,
-        category: "Accessories",
-        image: "https://picsum.photos/500/500?random=6",
-      },
-      {
-        _id: 7,
-        name: "Crochet Baby Booties",
-        price: 399,
-        category: "Baby Essentials",
-        image: "https://picsum.photos/500/500?random=7",
-      },
-      {
-        _id: 8,
-        name: "Crochet Baby Blanket",
-        price: 1499,
-        category: "Baby Essentials",
-        image: "https://picsum.photos/500/500?random=8",
-      },
-      {
-        _id: 9,
-        name: "Crochet Gift Hamper",
-        price: 1999,
-        category: "Gift Sets",
-        image: "https://picsum.photos/500/500?random=9",
-      },
-    ];
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
-    setProducts(fetchedProducts);
-  }, []);
+  const handleAddToCart = (product) => {
+    dispatch(addToCart({
+      product: product._id,
+      name: product.name,
+      image: getImageUrl(product.image || product.images?.[0]?.url),
+      price: product.price,
+      qty: 1,
+      countInStock: product.countInStock || 10
+    }));
+    toast.success('Product Added To Cart', { duration: 1000 });
+  };
 
   /* ---------------- FILTER ---------------- */
   const filteredProducts =
@@ -147,7 +99,11 @@ const CollectionPage = () => {
           {selectedCategory}
         </h2>
 
-        {filteredProducts.length === 0 ? (
+        {loading ? (
+          <p className="text-gray-500">Loading products...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : filteredProducts.length === 0 ? (
           <p className="text-gray-500">No products found.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -157,7 +113,7 @@ const CollectionPage = () => {
                 className="bg-white rounded-lg shadow hover:shadow-lg transition"
               >
                 <img
-                  src={product.image}
+                  src={getImageUrl(product.image || product.images?.[0]?.url)}
                   alt={product.name}
                   className="h-56 w-full object-cover rounded-t-lg"
                 />
@@ -176,7 +132,10 @@ const CollectionPage = () => {
                       ₹{product.price}
                     </span>
 
-                    <button className="bg-black text-white px-3 py-1 rounded hover:bg-gray-800">
+                    <button 
+                      onClick={() => handleAddToCart(product)}
+                      className="bg-black text-white px-3 py-1 rounded hover:bg-gray-800"
+                    >
                       Add to Cart
                     </button>
                   </div>

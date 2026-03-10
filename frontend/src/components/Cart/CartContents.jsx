@@ -1,72 +1,70 @@
-import React from 'react'
-import Sunflower from "/productImg/Sunflower.jpeg";
-import CherryClip from "/productImg/CherryClip.jpeg";
-import { Delete, Trash } from 'lucide-react';
+import { Trash } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { removeFromCart, addToCart } from '../../redux/slices/cartSlice';
+import { getImageUrl } from '../../utils/getImageUrl';
 
 const CartContents = () => {
-    const cartProducts = [
-        {
-            productId: 1,
-            name: "Crochet Flower",
-            type: "Sunflower",
-            color: "Yellow+Brown",
-            quantity: 1,
-            price: 80,
-            image: Sunflower
-        },
-        {
-            productId: 2,
-            name: "Crochet HairClip",
-            type: "CherryClip",
-            color: "Red+Green",
-            quantity: 1,
-            price: 50,
-            image: CherryClip
-        }
-    ]
+    const dispatch = useDispatch();
+    const { cartItems: cartProducts } = useSelector((state) => state.cart);
+
+    const handleRemove = (id) => {
+        dispatch(removeFromCart(id));
+    };
+
+    const updateQuantity = (product, newQty) => {
+        if (newQty < 1) return;
+        dispatch(addToCart({ ...product, qty: newQty }));
+    };
+
     return (
         <div>
-            {
-                cartProducts.map((product, index) => {
-                    return (
-                        <div
-                            key={product.productId}
-                            className="flex items-start justify-between py-4 border-b">
-
-                            <div className="flex items-start">
-                                <img 
-                                src={product.image} 
-                                alt={product.name} 
-                                className='h-40 w-32 object-cover mr-4 rounded' />
-                            
+            {cartProducts.length === 0 ? (
+                <p className="p-4 text-gray-400">Your cart is empty.</p>
+            ) : (
+                cartProducts.map((product) => (
+                    <div
+                        key={product.product}
+                        className="flex items-start justify-between py-4 border-b"
+                    >
+                        <div className="flex items-start">
+                            <img
+                                src={getImageUrl(product.image)}
+                                alt={product.name}
+                                className="h-24 w-20 object-cover mr-4 rounded"
+                            />
                             <div className="flex flex-col">
                                 <h3 className="font-medium">{product.name}</h3>
                                 <p className="text-sm text-gray-500">
-                                    Type: {product.type} | Color: {product.color}
+                                    ₹{product.price}
                                 </p>
                                 <div className="flex items-center mt-2">
-                                    <button className='border rounded px-2 py-1 text-xl font-medium'>
-                                       - 
+                                    <button
+                                        onClick={() => updateQuantity(product, (product.qty || 1) - 1)}
+                                        className="border rounded px-2 py-1 text-xl font-medium"
+                                    >
+                                        -
                                     </button>
-                                    <span className='mx-4'>{product.quantity}</span>
-                                    <button className='border rounded px-2 py-1 text-xl font-medium'>
-                                        +      
+                                    <span className="mx-4">{product.qty || 1}</span>
+                                    <button
+                                        onClick={() => updateQuantity(product, (product.qty || 1) + 1)}
+                                        className="border rounded px-2 py-1 text-xl font-medium"
+                                    >
+                                        +
                                     </button>
                                 </div>
                             </div>
                         </div>
-                        <div>
-                            <p>₹ {product.price.toLocaleString()}</p>
-                            <button>
-                                <Trash className='h-6 w-6 mt-2 text-red-600'/>
+                        <div className="text-right">
+                            <p className="font-medium">₹{(product.price * (product.qty || 1)).toLocaleString()}</p>
+                            <button onClick={() => handleRemove(product.product)}>
+                                <Trash className="h-5 w-5 mt-2 text-red-600 hover:text-red-800" />
                             </button>
                         </div>
                     </div>
-                    )
-                })
-            }
+                ))
+            )}
         </div>
-    )
-}
+    );
+};
 
-export default CartContents
+export default CartContents;

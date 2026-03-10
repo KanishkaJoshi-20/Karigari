@@ -1,25 +1,32 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { logout, getUserProfile } from "../redux/slices/authSlice";
 import MyOrders from "./MyOrderPage";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user, loading } = useSelector((state) => state.auth);
 
-  // Temporary user data (later from Firebase / backend)
-  const user = {
-    name: "John Doe",
-    email: "john@example.com",
-  };
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
-  // Protect route
-  const isLoggedIn = localStorage.getItem("user");
-  if (!isLoggedIn) {
-    navigate("/login");
-  }
+  useEffect(() => {
+    if (user) {
+      dispatch(getUserProfile());
+    }
+  }, [dispatch]);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    dispatch(logout());
     navigate("/login");
   };
+
+  if (!user) return null;
 
   return (
     <div className="min-h-screen flex flex-col">

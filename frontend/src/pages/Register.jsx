@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "../redux/slices/authSlice";
+import { toast } from "sonner";
 import loginImage from "../assets/Login-image.jpeg";
 
 const Register = () => {
@@ -9,14 +12,26 @@ const Register = () => {
   const [name, setName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { loading, error, user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("Name:", name);
-    console.log("Email:", email);
-    console.log("Contact Number:", contactNumber);
-    console.log("Password:", password);
-    console.log("Confirm Password:", confirmPassword);
+    if (password !== confirmPassword) {
+        toast.error("Passwords do not match");
+        return;
+    }
+
+    dispatch(registerUser({ name, email, contactNumber, password }));
   };
 
   return (
@@ -39,6 +54,8 @@ const Register = () => {
             Create an account to start shopping handmade goodies
           </p>
 
+          {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+          
           {/* Name */}
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Full Name</label>
@@ -107,9 +124,10 @@ const Register = () => {
           {/* Button */}
           <button
             type="submit"
-            className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2.5 rounded-lg font-semibold transition"
+            disabled={loading}
+            className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2.5 rounded-lg font-semibold transition disabled:opacity-50"
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
 
           {/* Login */}

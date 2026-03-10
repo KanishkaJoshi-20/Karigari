@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { getImageUrl } from '../../utils/getImageUrl';
 
-function NewArrivals() {
+function NewArrivals({ products = [], loading = false }) {
     const scrollRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -10,96 +11,7 @@ function NewArrivals() {
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
 
-    const newArrivals = [
-        {
-            _id: 1,
-            name: "Crochet Flower",
-            price: 80,
-            images: [
-                {
-                    url: "/productImg/Sunflower.jpeg",
-                    altText: "Sunflower Crochet Flower"
-                }
-            ],
-        },
-        {
-            _id: 2,
-            name: "Crochet Flower",
-            price: 80,
-            images: [
-                {
-                    url: "/productImg/Sunflower.jpeg",
-                    altText: "Sunflower Crochet Flower"
-                }
-            ],
-        },
-        {
-            _id: 3,
-            name: "Crochet Flower",
-            price: 80,
-            images: [
-                {
-                    url: "/productImg/Sunflower.jpeg",
-                    altText: "Sunflower Crochet Flower"
-                }
-            ],
-        },
-        {
-            _id: 4,
-            name: "Crochet Flower",
-            price: 80,
-            images: [
-                {
-                    url: "/productImg/Sunflower.jpeg",
-                    altText: "Sunflower Crochet Flower"
-                }
-            ],
-        },
-        {
-            _id: 5,
-            name: "Crochet Flower",
-            price: 80,
-            images: [
-                {
-                    url: "/productImg/Sunflower.jpeg",
-                    altText: "Sunflower Crochet Flower"
-                }
-            ],
-        },
-        {
-            _id: 6,
-            name: "Crochet Flower",
-            price: 80,
-            images: [
-                {
-                    url: "/productImg/Sunflower.jpeg",
-                    altText: "Sunflower Crochet Flower"
-                }
-            ],
-        },
-        {
-            _id: 7,
-            name: "Crochet Flower",
-            price: 80,
-            images: [
-                {
-                    url: "/productImg/Sunflower.jpeg",
-                    altText: "Sunflower Crochet Flower"
-                }
-            ],
-        },
-        {
-            _id: 8,
-            name: "Crochet Flower",
-            price: 80,
-            images: [
-                {
-                    url: "/productImg/Sunflower.jpeg",
-                    altText: "Sunflower Crochet Flower"
-                }
-            ],
-        },
-    ]
+
     // Mouse Down Event
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -177,13 +89,13 @@ function NewArrivals() {
         onMouseUp={handleMouseLeave}
         onMouseLeave={handleMouseLeave}
         className={`container mx-auto overflow-x-scroll flex space-x-6 relative ${isDragging ? 'cursor-grabbing' : 'cursor-grab' }`}>
-            {newArrivals.map((product) => (
+            {loading ? ( <p className="text-center w-full py-10">Loading Products...</p> ) : products.map((product) => (
                 <div key={product._id} 
                 className="min-w-full sm:min-w-[50%] lg:min-w-[30%] relative ">
                     <div className="bg-white rounded-lg shadow-md overflow-hidden">
                         <img 
-                        src={product.images[0].url} 
-                        alt={product.images[0].altText} 
+                        src={getImageUrl(product.image || product.images?.[0]?.url)} 
+                        alt={product.name} 
                         draggable="false"
                         className="w-118 h-128 object-cover rounded-lg hover:scale-105 transition-transform duration-300" />
 

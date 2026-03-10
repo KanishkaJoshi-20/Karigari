@@ -1,67 +1,90 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { getOrderDetails } from "../redux/slices/orderSlice";
+import { getImageUrl } from "../utils/getImageUrl";
 
 const OrderDetailsPage = () => {
-  const orderDetails = {
-    id: "12345",
-    date: "13/12/2024",
-    status: "Approved",
-    paymentMethod: "PayPal",
-    isPaid: true,
-    shippingMethod: "Standard",
-    address: "New York, USA",
-    orderItems: [
-      {
-        productId: "1",
-        name: "Jacket",
-        image: "https://via.placeholder.com/100",
-        price: 120,
-        quantity: 1,
-      },
-      {
-        productId: "2",
-        name: "Shirt",
-        image: "https://via.placeholder.com/100",
-        price: 150,
-        quantity: 2,
-      },
-    ],
-  };
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { user } = useSelector((state) => state.auth);
+  const { orderDetails: order, loading, error } = useSelector((state) => state.orders);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    dispatch(getOrderDetails(id));
+  }, [dispatch, id, user, navigate]);
+
+  if (loading || !order) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-600 text-lg">Loading order details...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-lg mb-4">{error}</p>
+          <Link to="/my-orders" className="text-blue-600 hover:underline">← Back to My Orders</Link>
+        </div>
+      </div>
+    );
+  }
+
+  const status = order.isDelivered
+    ? "Delivered"
+    : order.isPaid
+    ? "Processing"
+    : "Pending";
+
+  const statusColor = order.isDelivered
+    ? "bg-green-100 text-green-700"
+    : order.isPaid
+    ? "bg-blue-100 text-blue-700"
+    : "bg-yellow-100 text-yellow-700";
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6">
 
-        {/* ===== Header ===== */}
+        {/* Header */}
         <div className="flex justify-between items-start border-b pb-4 mb-6">
           <div>
             <h1 className="text-2xl font-semibold">Order Details</h1>
-            <p className="text-gray-600 mt-1">Order ID: #{orderDetails.id}</p>
-            <p className="text-gray-500 text-sm">{orderDetails.date}</p>
+            <p className="text-gray-600 mt-1">Order ID: #{order._id}</p>
+            <p className="text-gray-500 text-sm">
+              {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                year: "numeric", month: "long", day: "numeric"
+              })}
+            </p>
           </div>
-
-          <span
-            className={`px-4 py-1 rounded-full text-sm font-medium ${
-              orderDetails.status === "Approved"
-                ? "bg-green-100 text-green-700"
-                : "bg-yellow-100 text-yellow-700"
-            }`}
-          >
-            {orderDetails.status}
+          <span className={`px-4 py-1 rounded-full text-sm font-medium ${statusColor}`}>
+            {status}
           </span>
         </div>
 
-        {/* ===== Info Section ===== */}
+        {/* Info Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Payment Info */}
           <div>
             <h2 className="font-semibold text-lg mb-2">Payment Info</h2>
             <p className="text-gray-700">
-              <span className="font-medium">Method:</span> {orderDetails.paymentMethod}
+              <span className="font-medium">Method:</span> {order.paymentMethod}
             </p>
             <p className="text-gray-700">
               <span className="font-medium">Status:</span>{" "}
-              {orderDetails.isPaid ? (
-                <span className="text-green-600 font-medium">Paid</span>
+              {order.isPaid ? (
+                <span className="text-green-600 font-medium">
+                  Paid on {new Date(order.paidAt).toLocaleDateString()}
+                </span>
               ) : (
                 <span className="text-red-600 font-medium">Not Paid</span>
               )}
@@ -72,18 +95,24 @@ const OrderDetailsPage = () => {
           <div>
             <h2 className="font-semibold text-lg mb-2">Shipping Info</h2>
             <p className="text-gray-700">
-              <span className="font-medium">Method:</span> {orderDetails.shippingMethod}
+              <span className="font-medium">Address:</span>{" "}
+              {order.shippingAddress?.address}
             </p>
             <p className="text-gray-700">
-              <span className="font-medium">Address:</span> {orderDetails.address}
+              {order.shippingAddress?.city}, {order.shippingAddress?.postalCode},{" "}
+              {order.shippingAddress?.country}
             </p>
+            {order.isDelivered && (
+              <p className="text-green-600 mt-1 font-medium">
+                Delivered on {new Date(order.deliveredAt).toLocaleDateString()}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* ===== Products Table ===== */}
+        {/* Products Table */}
         <div>
           <h2 className="font-semibold text-lg mb-3">Products</h2>
-
           <div className="overflow-x-auto">
             <table className="w-full border rounded-lg overflow-hidden">
               <thead className="bg-gray-100">
@@ -94,27 +123,26 @@ const OrderDetailsPage = () => {
                   <th className="py-3 px-4">Total</th>
                 </tr>
               </thead>
-
               <tbody>
-                {orderDetails.orderItems.map((item) => (
-                  <tr key={item.productId} className="border-t">
+                {order.orderItems.map((item, i) => (
+                  <tr key={item.product || i} className="border-t">
                     <td className="py-3 px-4 flex items-center gap-4">
                       <img
-                        src={item.image}
+                        src={getImageUrl(item.image)}
                         alt={item.name}
                         className="w-12 h-12 object-cover rounded"
                       />
                       <Link
-                        to={`/product/${item.productId}`}
+                        to={`/product/${item.product}`}
                         className="text-blue-600 hover:underline"
                       >
                         {item.name}
                       </Link>
                     </td>
-                    <td className="py-3 px-4">${item.price}</td>
-                    <td className="py-3 px-4">{item.quantity}</td>
+                    <td className="py-3 px-4">₹{item.price}</td>
+                    <td className="py-3 px-4">{item.qty}</td>
                     <td className="py-3 px-4 font-medium">
-                      ${item.price * item.quantity}
+                      ₹{item.price * item.qty}
                     </td>
                   </tr>
                 ))}
@@ -123,7 +151,27 @@ const OrderDetailsPage = () => {
           </div>
         </div>
 
-        {/* ===== Back Link ===== */}
+        {/* Order Summary */}
+        <div className="mt-6 border-t pt-4">
+          <div className="flex justify-end">
+            <div className="w-64 space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Subtotal</span>
+                <span>₹{order.itemsPrice || (order.totalPrice - 50)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Shipping</span>
+                <span>₹{order.shippingPrice || 50}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                <span>Total</span>
+                <span>₹{order.totalPrice}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Back Link */}
         <div className="mt-6">
           <Link
             to="/my-orders"

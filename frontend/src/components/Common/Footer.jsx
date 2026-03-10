@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { FaInstagram, FaPhoneAlt, FaMapMarkerAlt } from "react-icons/fa";
 
 const Footer = () => {
@@ -5,17 +6,17 @@ const Footer = () => {
     <footer className="w-full bg-[#faf6f2] text-gray-700 mt-16">
       {/* Top Section */}
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-10">
-        
+
         {/* Categories */}
         <div>
           <h3 className="font-semibold text-lg mb-4">Categories</h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:text-gray-900">Crochet Bouquets</a></li>
-            <li><a href="#" className="hover:text-gray-900">Crochet Keychains</a></li>
-            <li><a href="#" className="hover:text-gray-900">Hair Accessories</a></li>
-            <li><a href="#" className="hover:text-gray-900">Crochet Pots</a></li>
-            <li><a href="#" className="hover:text-gray-900">Crochet Bags</a></li>
-            <li><a href="#" className="hover:text-gray-900">Winter Needs</a></li>
+            <li><Link to="/collections/all" className="hover:text-gray-900">All Products</Link></li>
+            <li><Link to="/collections/all" className="hover:text-gray-900">Amigurumi Toys</Link></li>
+            <li><Link to="/collections/all" className="hover:text-gray-900">Home Décor</Link></li>
+            <li><Link to="/collections/all" className="hover:text-gray-900">Accessories</Link></li>
+            <li><Link to="/collections/all" className="hover:text-gray-900">Baby Essentials</Link></li>
+            <li><Link to="/collections/all" className="hover:text-gray-900">Gift Sets</Link></li>
           </ul>
         </div>
 
@@ -23,10 +24,10 @@ const Footer = () => {
         <div>
           <h3 className="font-semibold text-lg mb-4">Help</h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:text-gray-900">Store Policies</a></li>
-            <li><a href="#" className="hover:text-gray-900">Track Your Order</a></li>
-            <li><a href="#" className="hover:text-gray-900">Return Policy</a></li>
-            <li><a href="#" className="hover:text-gray-900">Privacy Policy</a></li>
+            <li><Link to="/about" className="hover:text-gray-900">About Us</Link></li>
+            <li><Link to="/contact" className="hover:text-gray-900">Contact Us</Link></li>
+            <li><Link to="/my-orders" className="hover:text-gray-900">Track Your Order</Link></li>
+            <li><Link to="/custom-crochet" className="hover:text-gray-900">Custom Orders</Link></li>
           </ul>
         </div>
 
@@ -47,7 +48,9 @@ const Footer = () => {
           <div className="flex items-center gap-3 mt-4">
             <span className="text-sm font-medium">Connect with us</span>
             <a
-              href="#"
+              href="https://instagram.com/karigari.crochet"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-600 hover:text-gray-900 transition"
             >
               <FaInstagram size={20} />
@@ -70,7 +73,7 @@ const Footer = () => {
           <span>Mastercard</span>
           <span>UPI</span>
           <span>Net Banking</span>
-          <span>Wallet</span>
+          <span>COD</span>
         </div>
       </div>
     </footer>

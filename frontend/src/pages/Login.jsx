@@ -2,18 +2,29 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import loginImage from "../assets/Login-image.jpeg"; // change this to your image path
 
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../redux/slices/authSlice";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { loading, error, user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // For now just testing
-    console.log("Email:", email);
-    console.log("Password:", password);
-
-    // Later: connect Firebase / backend here
+    dispatch(loginUser({ email, password }));
   };
 
   return (
@@ -36,6 +47,8 @@ const Login = () => {
           <p className="text-center text-gray-500 mb-6">
             Login to continue shopping handmade goodies
           </p>
+
+          {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
 
           {/* Email */}
           <div className="mb-4">
@@ -66,9 +79,10 @@ const Login = () => {
           {/* Button */}
           <button
             type="submit"
-            className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg font-semibold transition"
+            disabled={loading}
+            className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg font-semibold transition disabled:opacity-50"
           >
-            Sign In
+            {loading ? "Signing In..." : "Sign In"}
           </button>
 
           {/* Register */}
