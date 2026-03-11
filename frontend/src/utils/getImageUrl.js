@@ -4,7 +4,7 @@ export const getImageUrl = (imagePath) => {
   
   const apiBase = import.meta.env.VITE_API_URL 
     ? import.meta.env.VITE_API_URL.replace("/api", "") 
-    : "http://localhost:5000";
+    : "https://karigari-1.onrender.com";
     
   if (imagePath.startsWith("/uploads")) {
     return `${apiBase}${imagePath}`;
