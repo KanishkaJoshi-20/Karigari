@@ -128,6 +128,12 @@ const authSlice = createSlice({
     clearAuthError: (state) => {
       state.error = null;
     },
+    setGoogleUser: (state, action) => {
+      state.user = action.payload;
+      state.loading = false;
+      state.error = null;
+      localStorage.setItem("userInfo", JSON.stringify(action.payload));
+    },
   },
   extraReducers: (builder) => {
     // Register
@@ -202,6 +208,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearAuthError } = authSlice.actions;
+export const { logout, clearAuthError,setGoogleUser } = authSlice.actions;
 
 export default authSlice.reducer;

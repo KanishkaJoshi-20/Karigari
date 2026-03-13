@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
+import { setGoogleUser } from "../redux/slices/authSlice"; // ✅ Import the action
 
 const AuthSuccess = () => {
   const navigate = useNavigate();
@@ -13,18 +14,29 @@ const AuthSuccess = () => {
     const email = searchParams.get("email");
     const name = searchParams.get("name");
 
-    if (token) {
-      localStorage.setItem("userToken", token);
-      localStorage.setItem(
-        "userInfo",
-        JSON.stringify({
-          email,
-          name,
-          _id: "",
-        })
-      );
-      toast.success("Welcome! You're now logged in.");
-      navigate("/", { replace: true });
+    if (token && email) {
+      try {
+        // Store token in localStorage
+        localStorage.setItem("userToken", token);
+
+        // Dispatch Redux action with user data
+        const userData = { email, name, _id: "" };
+        dispatch(setGoogleUser(userData)); // ✅ Use the action
+
+        toast.success("Welcome! You're now logged in.");
+        
+        // Clear URL params
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // Redirect to home
+        setTimeout(() => {
+          navigate("/", { replace: true });
+        }, 500);
+      } catch (error) {
+        console.error("Auth success error:", error);
+        toast.error("Failed to complete login");
+        navigate("/login", { replace: true });
+      }
     } else {
       navigate("/login", { replace: true });
     }

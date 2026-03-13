@@ -31,8 +31,8 @@ function App() {
           <Route index element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
           <Route path="/auth-success" element={<AuthSuccess />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/collections/:collection" element={<CollectionPage />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/checkout" element={<Checkout />} />
