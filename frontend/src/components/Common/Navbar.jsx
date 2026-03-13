@@ -1,4 +1,4 @@
-import { ShoppingBag, User, X, Menu } from 'lucide-react'
+import { ShoppingBag, User, X, Menu, Heart } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
@@ -16,8 +16,10 @@ const Navbar = () => {
 
   const { user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.cart);
+  const { wishlistItems } = useSelector((state) => state.wishlist);
 
   const cartCount = cartItems.reduce((acc, item) => acc + (item.qty || 1), 0);
+  const wishlistCount = wishlistItems?.length || 0;
 
   const toggleNavDrawer = () => setNavDrawerOpen(!navDrawerOpen);
   const toggleCartDrawer = () => setDrawerOpen(!drawerOpen);
@@ -44,13 +46,21 @@ const Navbar = () => {
 
         {/* Right Icons */}
         <div className="flex items-center space-x-4">
+          <Link to='/collections/Wishlist' className='relative hover:text-black'>
+            <Heart className='h-6 w-6 text-gray-700' />
+            {wishlistCount > 0 && (
+              <span className='absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold'>
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
           <Link to={user ? '/profile' : '/login'} className='hover:text-black'>
             <User className='h-6 w-6 text-gray-700' />
           </Link>
           <button onClick={toggleCartDrawer} className='relative hover:text-black'>
             <ShoppingBag className='h-6 w-6 text-gray-700' />
             {cartCount > 0 && (
-              <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 leading-none'>
+              <span className='absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold'>
                 {cartCount}
               </span>
             )}

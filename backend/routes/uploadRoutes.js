@@ -1,44 +1,28 @@
-import fs from "fs";
-import path from "path";
 import express from "express";
-import multer from "multer";
-import { fileURLToPath } from "url";
 import { admin, protect } from "../middleware/authMiddleware.js";
+import upload from "../middleware/upload.js";
 
 const router = express.Router();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const uploadDir = path.join(__dirname, "..", "uploads");
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename(req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "-")}`);
-  },
-});
-
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
-    cb(null, true);
-    return;
-  }
-  cb(new Error("Only image files are allowed"), false);
-};
-
-const upload = multer({ storage, fileFilter });
 
 router.post("/", protect, admin, upload.single("image"), (req, res) => {
-  // Return path the frontend can persist against product.image.
+  if (!req.file) {
+    return res.status(400).json({ message: "No image provided" });
+  }
+
+  // Cloudinary stores the file's secure URL in req.file.path
   res.status(201).json({
-    message: "Image uploaded",
-    image: `/uploads/${req.file.filename}`,
+    message: "Image uploaded successfully",
+    image: req.file.path,
   });
+});
+
+// Generic error handler inside the route for multer errors
+router.use((err, req, res, next) => {
+  if (err) {
+    res.status(400).json({ message: err.message });
+  } else {
+    next();
+  }
 });
 
 export default router;

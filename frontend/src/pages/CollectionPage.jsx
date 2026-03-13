@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../redux/slices/productSlice";
 import { addToCart } from "../redux/slices/cartSlice";
+import { toggleWishlist } from "../redux/slices/wishlistSlice";
 import { toast } from "sonner";
 import { FaFilter } from "react-icons/fa";
+import { Link, useParams } from "react-router-dom";
 import { getImageUrl } from "../utils/getImageUrl";
 
 const COLLECTIONS = [
@@ -13,11 +15,13 @@ const COLLECTIONS = [
   "Accessories",
   "Baby Essentials",
   "Gift Sets",
+  "Wishlist"
 ];
 
 const CollectionPage = () => {
   const dispatch = useDispatch();
   const { products, loading, error } = useSelector((state) => state.products);
+  const { wishlistItems } = useSelector((state) => state.wishlist);
 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -27,9 +31,21 @@ const CollectionPage = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const { collection } = useParams();
+
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (collection) {
+        // Find if it's a valid category, if not fallback to 'All'
+        const validCategory = COLLECTIONS.find(
+            (c) => c.toLowerCase() === collection.toLowerCase()
+        );
+        setSelectedCategory(validCategory || "All");
+    }
+  }, [collection]);
 
   const handleAddToCart = (product) => {
     dispatch(addToCart({
@@ -44,12 +60,14 @@ const CollectionPage = () => {
   };
 
   /* ---------------- FILTER ---------------- */
-  const filteredProducts =
-    selectedCategory === "All"
-      ? products
-      : products.filter(
-          (product) => product.category === selectedCategory
-        );
+  let filteredProducts = [];
+  if (selectedCategory === "All") {
+    filteredProducts = products;
+  } else if (selectedCategory === "Wishlist") {
+    filteredProducts = wishlistItems;
+  } else {
+    filteredProducts = products.filter((product) => product.category === selectedCategory);
+  }
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
@@ -110,31 +128,47 @@ const CollectionPage = () => {
             {filteredProducts.map((product) => (
               <div
                 key={product._id}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition"
+                className="bg-white rounded-lg shadow hover:shadow-lg transition flex flex-col relative"
               >
-                <img
-                  src={getImageUrl(product.image || product.images?.[0]?.url)}
-                  alt={product.name}
-                  className="h-56 w-full object-cover rounded-t-lg"
-                />
+                <Link to={`/product/${product._id}`} className="block relative h-56 w-full cursor-pointer">
+                    <img
+                      src={getImageUrl(product.image || product.images?.[0]?.url)}
+                      alt={product.name}
+                      className="absolute inset-0 h-full w-full object-cover rounded-t-lg"
+                    />
+                    <button 
+                      onClick={(e) => {
+                          e.preventDefault();
+                          dispatch(toggleWishlist(product));
+                      }}
+                      className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-sm hover:scale-110 transition-transform z-10"
+                    >
+                      <span className={`material-symbols-outlined text-[18px] ${wishlistItems?.some(item => item._id === product._id) ? 'fill-1 text-primary' : 'text-slate-400'}`}>favorite</span>
+                    </button>
+                </Link>
 
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg">
-                    {product.name}
-                  </h3>
+                <div className="p-4 flex flex-col flex-1">
+                  <Link to={`/product/${product._id}`} className="block hover:underline">
+                    <h3 className="font-semibold text-lg">
+                      {product.name}
+                    </h3>
+                  </Link>
 
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 mb-auto">
                     {product.category}
                   </p>
 
-                  <div className="flex justify-between items-center mt-3">
-                    <span className="font-bold text-lg">
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+                    <span className="font-bold text-lg text-primary">
                       ₹{product.price}
                     </span>
 
                     <button 
-                      onClick={() => handleAddToCart(product)}
-                      className="bg-black text-white px-3 py-1 rounded hover:bg-gray-800"
+                      onClick={(e) => {
+                          e.preventDefault();
+                          handleAddToCart(product);
+                      }}
+                      className="bg-black text-white px-3 py-1.5 rounded hover:bg-gray-800 focus:ring-2 focus:ring-primary/50 transition-colors z-10"
                     >
                       Add to Cart
                     </button>
