@@ -1,11 +1,10 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import loginImage from "../assets/Login-image.jpeg"; // change this to your image path
-
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import loginImage from "../assets/Login-image.jpeg";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../redux/slices/authSlice";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import GoogleLoginButton from "../components/Auth/GoogleLoginButton";
+import { toast } from "sonner";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -22,6 +21,39 @@ const Login = () => {
     }
   }, [user, navigate]);
 
+  // Handle OAuth redirect callback
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const token = searchParams.get("token");
+    const errorMsg = searchParams.get("error");
+
+    if (token) {
+      const email = searchParams.get("email");
+      const name = searchParams.get("name");
+      
+      localStorage.setItem("userToken", token);
+      localStorage.setItem(
+        "userInfo",
+        JSON.stringify({
+          email,
+          name,
+          _id: "", // Will be fetched from profile
+        })
+      );
+
+      // Clear the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      navigate("/");
+      toast.success("Logged in successfully!");
+    }
+
+    if (errorMsg) {
+      toast.error(`Login failed: ${errorMsg}`);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [navigate]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(loginUser({ email, password }));
@@ -29,67 +61,69 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex">
-
       {/* Left Side - Form */}
       <div className="w-full md:w-1/2 flex justify-center items-center p-8 md:p-12 bg-pink-50">
-        <form
-          onSubmit={handleSubmit}
-          className="w-full max-w-md bg-white p-8 rounded-xl shadow-md"
-        >
-          {/* Logo / Brand */}
-          <div className="flex justify-center mb-6">
-            <h2 className="text-2xl font-bold text-pink-600">🧶 CozyCrochet</h2>
-          </div>
-
-          <h2 className="text-2xl font-bold text-center mb-2">
-            Welcome Back 💖
-          </h2>
-          <p className="text-center text-gray-500 mb-6">
-            Login to continue shopping handmade goodies
+        <form onSubmit={handleSubmit} className="w-full max-w-md">
+          <h2 className="text-3xl font-bold mb-2">Welcome Back</h2>
+          <p className="text-gray-600 mb-8">
+            Sign in to your account to continue
           </p>
 
-          {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
 
-          {/* Email */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Email</label>
+            <label className="block text-sm font-medium mb-2">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+              placeholder="you@example.com"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
               required
             />
           </div>
 
-          {/* Password */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Password</label>
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
               required
             />
           </div>
 
-          {/* Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg font-semibold transition disabled:opacity-50"
+            className="w-full bg-pink-500 text-white py-2 rounded-lg hover:bg-pink-600 transition-colors disabled:opacity-50 font-medium mb-4"
           >
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
 
-          {/* Register */}
-          <p className="mt-6 text-center text-sm">
-            Don’t have an account?{" "}
-            <Link to="/register" className="text-pink-500 font-semibold">
-              Register
+          {/* Divider */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 border-t border-gray-300"></div>
+            <span className="text-gray-500 text-sm">Or</span>
+            <div className="flex-1 border-t border-gray-300"></div>
+          </div>
+
+          {/* Google Login Button */}
+          <GoogleLoginButton isLoading={loading} />
+
+          <p className="text-center mt-4 text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-pink-500 hover:underline font-medium"
+            >
+              Sign up
             </Link>
           </p>
         </form>
@@ -100,10 +134,9 @@ const Login = () => {
         <img
           src={loginImage}
           alt="Login"
-          className="h-full w-full object-cover"
+          className="w-full h-full object-cover"
         />
       </div>
-
     </div>
   );
 };

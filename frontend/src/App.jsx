@@ -20,6 +20,7 @@ import AdminUsersPage from './pages/AdminUsersPage'
 import CustomCrochet from './pages/CustomCrochet'
 import AboutUs from './pages/AboutUs'
 import ContactUs from './pages/ContactUs'
+import AuthSuccess from './pages/AuthSuccess';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/auth-success" element={<AuthSuccess />} />
           <Route path="/collections/:collection" element={<CollectionPage />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/checkout" element={<Checkout />} />
