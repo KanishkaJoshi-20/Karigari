@@ -1,10 +1,10 @@
 import axios from "axios";
 
 // Default base URL for API
-const API_URL = import.meta.env.VITE_API_URL || "https://karigari-1.onrender.com/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://karigari-1.onrender.com";
 
 const axiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL + "/api",
   headers: {
     "Content-Type": "application/json",
   },
