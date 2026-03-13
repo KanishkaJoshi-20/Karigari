@@ -25,57 +25,34 @@ const userResponse = (user, token) => ({
 
 export const googleAuthCallback = async (req, res, next) => {
   try {
-    const { id, emails, displayName, photos } = req.user;
-
-    if (!emails || !emails.length) {
-      res.status(400);
-      throw new Error("Email not provided by Google");
+    if (!req.user) {
+      throw new Error("User not authenticated from Google");
     }
 
-    const email = emails[0].value;
-    const picture = photos && photos.length > 0 ? photos[0].value : null;
+    const { _id, email, name } = req.user;
 
-    // Check if user already exists
-    let user = await User.findOne({
-      $or: [{ email }, { googleId: id }],
-    });
-
-    if (user) {
-      // Update OAuth info if this is a new OAuth login for existing email-based user
-      if (!user.googleId) {
-        user.googleId = id;
-        user.oauthProvider = "google";
-        if (picture && !user.profilePicture) {
-          user.profilePicture = picture;
-        }
-        await user.save();
-      }
-    } else {
-      // Create new user
-      user = await User.create({
-        name: displayName || email.split("@")[0],
-        email,
-        googleId: id,
-        oauthProvider: "google",
-        profilePicture: picture,
-        password: null,
-      });
+    if (!email) {
+      throw new Error(
+        "Email not available. Please check your Google Account privacy settings and ensure email sharing is enabled."
+      );
     }
 
-    const token = generateToken(user._id);
-
-    // Set user in session (optional, for maintaining session)
-    req.user = user;
-
-    // Redirect to frontend with token
+    const token = generateToken(_id);
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+
+    // URL encode parameters to handle special characters
+    const encodedEmail = encodeURIComponent(email);
+    const encodedName = encodeURIComponent(name);
+    const encodedToken = encodeURIComponent(token);
+
     res.redirect(
-      `${frontendUrl}/auth-success?token=${token}&email=${email}&name=${user.name}`
+      `${frontendUrl}/auth-success?token=${encodedToken}&email=${encodedEmail}&name=${encodedName}`
     );
   } catch (error) {
     console.error("Google auth callback error:", error);
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-    res.redirect(`${frontendUrl}/login?error=${error.message}`);
+    const encodedError = encodeURIComponent(error.message);
+    res.redirect(`${frontendUrl}/login?error=${encodedError}`);
   }
 };
 

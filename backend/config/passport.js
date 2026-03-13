@@ -12,10 +12,25 @@ export const configurePassport = () => {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          const email = profile.emails?.[0]?.value;
+          // Debug: Log the entire profile
+          console.log("Google Profile:", {
+            id: profile.id,
+            displayName: profile.displayName,
+            emails: profile.emails,
+            photos: profile.photos,
+          });
+
+          // Get email - handle different email formats
+          const email = profile.emails && profile.emails.length > 0 
+            ? profile.emails[0].value 
+            : profile._json?.email || profile.email;
 
           if (!email) {
-            return done(new Error("Email not provided by Google"), null);
+            console.error("No email found in Google profile:", profile);
+            return done(
+              new Error("Email not provided by Google. Please ensure email is public in your Google Account settings."), 
+              null
+            );
           }
 
           // Find or create user
@@ -51,6 +66,7 @@ export const configurePassport = () => {
 
           return done(null, user);
         } catch (error) {
+          console.error("Passport Google Strategy Error:", error);
           return done(error, null);
         }
       }
