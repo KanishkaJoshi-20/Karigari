@@ -54,7 +54,25 @@ router.get("/:userId", protect, async (req, res, next) => {
     }
 
     const cartItems = await Cart.find({ user: req.params.userId }).populate("product");
-    res.json(cartItems);
+
+    // Separate valid items from orphaned ones (product was deleted)
+    const validItems = [];
+    const orphanedIds = [];
+
+    for (const item of cartItems) {
+      if (item.product) {
+        validItems.push(item);
+      } else {
+        orphanedIds.push(item._id);
+      }
+    }
+
+    // Clean up orphaned cart entries in the background
+    if (orphanedIds.length > 0) {
+      Cart.deleteMany({ _id: { $in: orphanedIds } }).catch(() => { });
+    }
+
+    res.json(validItems);
   } catch (error) {
     next(error);
   }
