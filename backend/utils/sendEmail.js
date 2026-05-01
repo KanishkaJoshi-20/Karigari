@@ -1,8 +1,9 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 /**
- * Sends an email using Nodemailer via Gmail App Password.
- * Logs detailed errors to help with debugging on Render.
+ * Sends an email via Resend HTTP API.
+ * Works on all cloud platforms (Render, Vercel, Railway, etc.)
+ * because it uses port 443 (HTTPS), never blocked.
  *
  * @param {Object} options
  * @param {string} options.to       - Recipient email address
@@ -10,40 +11,30 @@ import nodemailer from "nodemailer";
  * @param {string} options.html     - HTML email body
  */
 const sendEmail = async ({ to, subject, html }) => {
-  const user = process.env.EMAIL_USER;
-  const pass = process.env.EMAIL_PASS;
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromAddress = process.env.EMAIL_FROM || "Karigari by Nisha <onboarding@resend.dev>";
 
-  if (!user || !pass) {
-    console.warn("[Email] Skipped — EMAIL_USER or EMAIL_PASS not set in environment.");
+  if (!apiKey) {
+    console.warn("[Email] Skipped — RESEND_API_KEY not set in environment.");
     return;
   }
 
   console.log(`[Email] Attempting to send to: ${to}`);
-  console.log(`[Email] Using sender: ${user}`);
 
-  // Create a fresh transporter each time (avoids stale connection issues on Render)
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true, // Use SSL
-    auth: {
-      user,
-      pass,
-    },
-  });
+  const resend = new Resend(apiKey);
 
-  // Verify connection before sending
-  await transporter.verify();
-  console.log("[Email] SMTP connection verified ✅");
-
-  const info = await transporter.sendMail({
-    from: `"Karigari by Nisha" <${user}>`,
+  const { data, error } = await resend.emails.send({
+    from: fromAddress,
     to,
     subject,
     html,
   });
 
-  console.log(`[Email] ✅ Sent successfully to ${to} — MessageId: ${info.messageId}`);
+  if (error) {
+    throw new Error(`Resend error: ${error.message || JSON.stringify(error)}`);
+  }
+
+  console.log(`[Email] ✅ Sent successfully to ${to} — Id: ${data?.id}`);
 };
 
 export default sendEmail;
