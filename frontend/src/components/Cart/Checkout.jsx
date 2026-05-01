@@ -9,8 +9,286 @@ import { getImageUrl } from "../../utils/getImageUrl";
 import axiosInstance from "../../api/axiosConfig";
 
 const SHIPPING_COST = 50;
-
 const round2 = (num) => Math.round((Number(num) + Number.EPSILON) * 100) / 100;
+
+/* ─── Sub-components defined OUTSIDE Checkout to prevent focus loss ─── */
+
+const AddressForm = ({ shippingAddress, onChange, onSubmit, hasSavedAddress, onCancel }) => (
+  <form onSubmit={onSubmit} className="space-y-4">
+    <h3 className="text-lg font-medium">Contact Details</h3>
+
+    <div>
+      <label className="block text-gray-700">Email</label>
+      <input
+        type="email"
+        name="email"
+        value={shippingAddress.email}
+        onChange={onChange}
+        className="w-full p-2 border rounded"
+      />
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label className="block text-gray-700">First Name</label>
+        <input
+          type="text"
+          name="firstName"
+          value={shippingAddress.firstName}
+          onChange={onChange}
+          className="w-full p-2 border rounded"
+        />
+      </div>
+      <div>
+        <label className="block text-gray-700">Last Name</label>
+        <input
+          type="text"
+          name="lastName"
+          value={shippingAddress.lastName}
+          onChange={onChange}
+          className="w-full p-2 border rounded"
+        />
+      </div>
+    </div>
+
+    <div>
+      <label className="block text-gray-700">Phone</label>
+      <input
+        type="tel"
+        name="phone"
+        value={shippingAddress.phone}
+        onChange={onChange}
+        className="w-full p-2 border rounded"
+        required
+      />
+    </div>
+
+    <h3 className="text-lg font-medium mt-6">Shipping Address</h3>
+
+    <div>
+      <label className="block text-gray-700">Address</label>
+      <input
+        type="text"
+        name="address"
+        value={shippingAddress.address}
+        onChange={onChange}
+        className="w-full p-2 border rounded"
+        required
+      />
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label className="block text-gray-700">City</label>
+        <input
+          type="text"
+          name="city"
+          value={shippingAddress.city}
+          onChange={onChange}
+          className="w-full p-2 border rounded"
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-gray-700">Postal Code</label>
+        <input
+          type="text"
+          name="postalCode"
+          value={shippingAddress.postalCode}
+          onChange={onChange}
+          className="w-full p-2 border rounded"
+          required
+        />
+      </div>
+    </div>
+
+    <div>
+      <label className="block text-gray-700">Country</label>
+      <input
+        type="text"
+        name="country"
+        value={shippingAddress.country}
+        onChange={onChange}
+        className="w-full p-2 border rounded"
+        required
+      />
+    </div>
+
+    <div className="flex gap-4 mt-6">
+      <button
+        type="submit"
+        className="flex-1 bg-black text-white py-3 rounded hover:bg-gray-800 transition"
+      >
+        CONTINUE TO PAYMENT
+      </button>
+      {hasSavedAddress && (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 bg-gray-200 text-gray-800 py-3 rounded hover:bg-gray-300 transition"
+        >
+          Cancel
+        </button>
+      )}
+    </div>
+  </form>
+);
+
+const SavedAddressView = ({ shippingAddress, onEdit, onContinue }) => (
+  <div>
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-lg font-medium">Delivery Address</h3>
+      <button
+        type="button"
+        onClick={onEdit}
+        className="text-sm border border-black px-3 py-1 rounded hover:bg-black hover:text-white transition"
+      >
+        Update / Add New
+      </button>
+    </div>
+
+    <div className="bg-gray-50 p-4 rounded-lg border space-y-1 mb-6">
+      <p className="font-medium">
+        {shippingAddress.firstName} {shippingAddress.lastName}
+      </p>
+      <p className="text-gray-600">{shippingAddress.address}</p>
+      <p className="text-gray-600">
+        {shippingAddress.city}, {shippingAddress.postalCode}
+      </p>
+      <p className="text-gray-600">{shippingAddress.country}</p>
+      <p className="text-gray-500 text-sm">{shippingAddress.phone}</p>
+      {shippingAddress.email ? (
+        <p className="text-gray-500 text-sm">{shippingAddress.email}</p>
+      ) : null}
+    </div>
+
+    <button
+      type="button"
+      onClick={onContinue}
+      className="w-full bg-black text-white py-3 rounded hover:bg-gray-800 transition"
+    >
+      CONTINUE TO PAYMENT
+    </button>
+  </div>
+);
+
+const PaymentMethodView = ({ paymentMethod, onMethodChange, onBack, onContinue }) => (
+  <div>
+    <h3 className="text-lg font-medium mb-4">Select Payment Method</h3>
+    <div className="space-y-4">
+      <label
+        className={`block border p-4 rounded cursor-pointer ${
+          paymentMethod === "COD" ? "border-black bg-gray-50" : "border-gray-200"
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="COD"
+            checked={paymentMethod === "COD"}
+            onChange={() => onMethodChange("COD")}
+            className="w-5 h-5 accent-black"
+          />
+          <span className="font-medium">Cash on Delivery (COD)</span>
+        </div>
+        <p className="text-gray-500 text-sm mt-2 ml-8">
+          Pay with cash when your order is delivered.
+        </p>
+      </label>
+
+      <label className="block border p-4 rounded cursor-not-allowed border-gray-200 opacity-60">
+        <div className="flex items-center gap-3">
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="Card"
+            disabled
+            className="w-5 h-5"
+          />
+          <span className="font-medium flex items-center gap-2">
+            Credit / Debit Card{" "}
+            <span className="text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-700 font-bold">
+              Coming Soon
+            </span>
+          </span>
+        </div>
+        <p className="text-gray-500 text-sm mt-2 ml-8">
+          Online payments will be available shortly.
+        </p>
+      </label>
+    </div>
+
+    <div className="flex gap-4 mt-6">
+      <button
+        type="button"
+        onClick={onBack}
+        className="flex-1 bg-gray-200 text-gray-800 py-3 rounded hover:bg-gray-300 transition"
+      >
+        Back to Address
+      </button>
+      <button
+        type="button"
+        onClick={onContinue}
+        className="flex-1 bg-black text-white py-3 rounded hover:bg-gray-800 transition"
+      >
+        CONTINUE TO REVIEW
+      </button>
+    </div>
+  </div>
+);
+
+const ReviewOrderView = ({ shippingAddress, paymentMethod, creatingOrder, loading, cartItems, onBack, onPlaceOrder, onEditStep }) => (
+  <div>
+    <h3 className="text-lg font-medium mb-4">Review Your Order</h3>
+
+    <div className="bg-gray-50 p-4 rounded-lg border mb-6">
+      <div className="flex justify-between items-start mb-2">
+        <h4 className="font-semibold text-gray-700">Shipping to</h4>
+        <button onClick={() => onEditStep(1)} className="text-sm text-blue-600 hover:underline">
+          Edit
+        </button>
+      </div>
+      <p className="text-gray-600 text-sm">
+        {shippingAddress.firstName} {shippingAddress.lastName} <br />
+        {shippingAddress.address}, {shippingAddress.city}, {shippingAddress.postalCode}
+      </p>
+    </div>
+
+    <div className="bg-gray-50 p-4 rounded-lg border mb-6">
+      <div className="flex justify-between items-start mb-2">
+        <h4 className="font-semibold text-gray-700">Payment Method</h4>
+        <button onClick={() => onEditStep(2)} className="text-sm text-blue-600 hover:underline">
+          Edit
+        </button>
+      </div>
+      <p className="text-gray-600 text-sm font-medium">
+        {paymentMethod === "COD" ? "Cash on Delivery" : paymentMethod}
+      </p>
+    </div>
+
+    <div className="flex gap-4 mt-6">
+      <button
+        type="button"
+        onClick={onBack}
+        disabled={creatingOrder}
+        className="w-1/3 bg-gray-200 text-gray-800 py-3 rounded hover:bg-gray-300 transition disabled:opacity-50"
+      >
+        Back
+      </button>
+      <button
+        type="button"
+        onClick={onPlaceOrder}
+        disabled={creatingOrder || loading || cartItems.length === 0}
+        className="w-2/3 bg-black text-white py-3 rounded hover:bg-gray-800 transition disabled:opacity-50"
+      >
+        {creatingOrder || loading ? "PROCESSING..." : "PLACE ORDER"}
+      </button>
+    </div>
+  </div>
+);
+
+/* ─── Main Checkout Component ─── */
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -23,7 +301,6 @@ const Checkout = () => {
   const [step, setStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [loading, setLoading] = useState(false);
-
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [shippingAddress, setShippingAddress] = useState({
     email: "",
@@ -44,8 +321,8 @@ const Checkout = () => {
     }
 
     // Load Razorpay script
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
     document.body.appendChild(script);
   }, [user, navigate]);
@@ -71,7 +348,13 @@ const Checkout = () => {
   }, [user]);
 
   const subtotal = useMemo(
-    () => round2(cartItems.reduce((acc, item) => acc + Number(item.price || 0) * Number(item.qty || 1), 0)),
+    () =>
+      round2(
+        cartItems.reduce(
+          (acc, item) => acc + Number(item.price || 0) * Number(item.qty || 1),
+          0
+        )
+      ),
     [cartItems]
   );
   const total = round2(subtotal + SHIPPING_COST);
@@ -86,11 +369,7 @@ const Checkout = () => {
 
   useEffect(() => {
     if (!user) return;
-    if (!hasSavedAddress) {
-      setIsEditingAddress(true);
-      return;
-    }
-    setIsEditingAddress(false);
+    setIsEditingAddress(!hasSavedAddress);
   }, [user, hasSavedAddress]);
 
   const handleChange = (e) => {
@@ -107,7 +386,9 @@ const Checkout = () => {
 
     if (isEditingAddress || !hasSavedAddress) {
       const requiredFields = ["address", "city", "postalCode", "country", "phone"];
-      const missingField = requiredFields.find((field) => !String(shippingAddress[field] || "").trim());
+      const missingField = requiredFields.find(
+        (field) => !String(shippingAddress[field] || "").trim()
+      );
 
       if (missingField) {
         toast.error("Please complete your shipping address");
@@ -146,7 +427,6 @@ const Checkout = () => {
         totalPrice: total,
       };
 
-      // Step 1: Create order in DB
       const order = await dispatch(createOrder(orderData)).unwrap();
 
       if (paymentMethod === "COD") {
@@ -156,333 +436,108 @@ const Checkout = () => {
         return;
       }
 
-      // Step 2: Create Razorpay order
-      const paymentRes = await axiosInstance.post('/payment/create-razorpay-order', {
+      const paymentRes = await axiosInstance.post("/payment/create-razorpay-order", {
         orderId: order._id,
         amount: total,
       });
 
-    const { razorpayOrderId, razorpayKeyId } = paymentRes.data;
+      const { razorpayOrderId, razorpayKeyId } = paymentRes.data;
 
-    // Step 3: Open Razorpay modal
-    const options = {
-      key: razorpayKeyId,
-      amount: total * 100, // in paise
-      currency: 'INR',
-      name: 'Karigari',
-      description: `Order ${order._id}`,
-      order_id: razorpayOrderId,
-      handler: async (response) => {
-        // Step 4: Verify payment
-        try {
-          const verifyRes = await axiosInstance.post('/payment/verify-payment', {
-            razorpayOrderId,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-            orderId: order._id,
-          });
+      const options = {
+        key: razorpayKeyId,
+        amount: total * 100,
+        currency: "INR",
+        name: "Karigari",
+        description: `Order ${order._id}`,
+        order_id: razorpayOrderId,
+        handler: async (response) => {
+          try {
+            await axiosInstance.post("/payment/verify-payment", {
+              razorpayOrderId,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              orderId: order._id,
+            });
+            dispatch(clearCart());
+            toast.success("Payment successful!");
+            navigate(`/order-confirmation?orderId=${order._id}`);
+          } catch {
+            toast.error("Payment verification failed");
+          }
+        },
+        prefill: {
+          email: user.email,
+          contact: user.phone,
+        },
+      };
 
-          // Payment successful
-          dispatch(clearCart());
-          toast.success('Payment successful!');
-          navigate(`/order-confirmation?orderId=${order._id}`);
-        } catch (error) {
-          toast.error('Payment verification failed');
-        }
-      },
-      prefill: {
-        email: user.email,
-        contact: user.phone,
-      },
-    };
-
-    const razorpay = new window.Razorpay(options);
-    razorpay.open();
-  } catch (error) {
-    toast.error(error?.message || 'Failed to place order');
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const AddressForm = () => (
-    <form onSubmit={handleContinueToPayment} className="space-y-4">
-      <h3 className="text-lg font-medium">Contact Details</h3>
-
-      <div>
-        <label className="block text-gray-700">Email</label>
-        <input
-          type="email"
-          name="email"
-          value={shippingAddress.email}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-gray-700">First Name</label>
-          <input
-            type="text"
-            name="firstName"
-            value={shippingAddress.firstName}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700">Last Name</label>
-          <input
-            type="text"
-            name="lastName"
-            value={shippingAddress.lastName}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-gray-700">Phone</label>
-        <input
-          type="tel"
-          name="phone"
-          value={shippingAddress.phone}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-
-      <h3 className="text-lg font-medium mt-6">Shipping Address</h3>
-
-      <div>
-        <label className="block text-gray-700">Address</label>
-        <input
-          type="text"
-          name="address"
-          value={shippingAddress.address}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-gray-700">City</label>
-          <input
-            type="text"
-            name="city"
-            value={shippingAddress.city}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700">Postal Code</label>
-          <input
-            type="text"
-            name="postalCode"
-            value={shippingAddress.postalCode}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-gray-700">Country</label>
-        <input
-          type="text"
-          name="country"
-          value={shippingAddress.country}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-
-      <div className="flex gap-4 mt-6">
-        <button
-          type="submit"
-          className="flex-1 bg-black text-white py-3 rounded hover:bg-gray-800 transition"
-        >
-          CONTINUE TO PAYMENT
-        </button>
-        {hasSavedAddress && (
-          <button
-            type="button"
-            onClick={() => setIsEditingAddress(false)}
-            className="flex-1 bg-gray-200 text-gray-800 py-3 rounded hover:bg-gray-300 transition"
-          >
-            Cancel
-          </button>
-        )}
-      </div>
-    </form>
-  );
-
-  const SavedAddressView = () => (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium">Delivery Address</h3>
-        <button
-          type="button"
-          onClick={() => setIsEditingAddress(true)}
-          className="text-sm border border-black px-3 py-1 rounded hover:bg-black hover:text-white transition"
-        >
-          Update / Add New
-        </button>
-      </div>
-
-      <div className="bg-gray-50 p-4 rounded-lg border space-y-1 mb-6">
-        <p className="font-medium">
-          {shippingAddress.firstName} {shippingAddress.lastName}
-        </p>
-        <p className="text-gray-600">{shippingAddress.address}</p>
-        <p className="text-gray-600">
-          {shippingAddress.city}, {shippingAddress.postalCode}
-        </p>
-        <p className="text-gray-600">{shippingAddress.country}</p>
-        <p className="text-gray-500 text-sm">{shippingAddress.phone}</p>
-        {shippingAddress.email ? <p className="text-gray-500 text-sm">{shippingAddress.email}</p> : null}
-      </div>
-
-      <button
-        type="button"
-        onClick={handleContinueToPayment}
-        className="w-full bg-black text-white py-3 rounded hover:bg-gray-800 transition"
-      >
-        CONTINUE TO PAYMENT
-      </button>
-    </div>
-  );
-
-  const PaymentMethodView = () => (
-    <div>
-      <h3 className="text-lg font-medium mb-4">Select Payment Method</h3>
-      <div className="space-y-4">
-        <label className={`block border p-4 rounded cursor-pointer ${paymentMethod === "COD" ? "border-black bg-gray-50" : "border-gray-200"}`}>
-          <div className="flex items-center gap-3">
-            <input 
-              type="radio" 
-              name="paymentMethod" 
-              value="COD" 
-              checked={paymentMethod === "COD"}
-              onChange={() => setPaymentMethod("COD")}
-              className="w-5 h-5 accent-black"
-            />
-            <span className="font-medium">Cash on Delivery (COD)</span>
-          </div>
-          <p className="text-gray-500 text-sm mt-2 ml-8">Pay with cash when your order is delivered.</p>
-        </label>
-
-        <label className="block border p-4 rounded cursor-not-allowed border-gray-200 opacity-60">
-          <div className="flex items-center gap-3">
-            <input 
-              type="radio" 
-              name="paymentMethod" 
-              value="Card" 
-              disabled
-              className="w-5 h-5"
-            />
-            <span className="font-medium flex items-center gap-2">Credit / Debit Card <span className="text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-700 font-bold">Coming Soon</span></span>
-          </div>
-          <p className="text-gray-500 text-sm mt-2 ml-8">Online payments will be available shortly.</p>
-        </label>
-      </div>
-
-      <div className="flex gap-4 mt-6">
-        <button
-          type="button"
-          onClick={() => setStep(1)}
-          className="flex-1 bg-gray-200 text-gray-800 py-3 rounded hover:bg-gray-300 transition"
-        >
-          Back to Address
-        </button>
-        <button
-          type="button"
-          onClick={() => setStep(3)}
-          className="flex-1 bg-black text-white py-3 rounded hover:bg-gray-800 transition"
-        >
-          CONTINUE TO REVIEW
-        </button>
-      </div>
-    </div>
-  );
-
-  const ReviewOrderView = () => (
-    <div>
-      <h3 className="text-lg font-medium mb-4">Review Your Order</h3>
-      
-      <div className="bg-gray-50 p-4 rounded-lg border mb-6">
-        <div className="flex justify-between items-start mb-2">
-          <h4 className="font-semibold text-gray-700">Shipping to</h4>
-          <button onClick={() => setStep(1)} className="text-sm text-blue-600 hover:underline">Edit</button>
-        </div>
-        <p className="text-gray-600 text-sm">
-          {shippingAddress.firstName} {shippingAddress.lastName} <br/>
-          {shippingAddress.address}, {shippingAddress.city}, {shippingAddress.postalCode}
-        </p>
-      </div>
-
-      <div className="bg-gray-50 p-4 rounded-lg border mb-6">
-        <div className="flex justify-between items-start mb-2">
-          <h4 className="font-semibold text-gray-700">Payment Method</h4>
-          <button onClick={() => setStep(2)} className="text-sm text-blue-600 hover:underline">Edit</button>
-        </div>
-        <p className="text-gray-600 text-sm font-medium">
-          {paymentMethod === "COD" ? "Cash on Delivery" : paymentMethod}
-        </p>
-      </div>
-
-      <div className="flex gap-4 mt-6">
-        <button
-          type="button"
-          onClick={() => setStep(2)}
-          disabled={creatingOrder}
-          className="w-1/3 bg-gray-200 text-gray-800 py-3 rounded hover:bg-gray-300 transition disabled:opacity-50"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={handlePlaceOrder}
-          disabled={creatingOrder || loading || cartItems.length === 0}
-          className="w-2/3 bg-black text-white py-3 rounded hover:bg-gray-800 transition disabled:opacity-50"
-        >
-          {creatingOrder || loading ? "PROCESSING..." : "PLACE ORDER"}
-        </button>
-      </div>
-    </div>
-  );
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      toast.error(error?.message || "Failed to place order");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
         <div className="bg-white rounded-lg p-6 shadow">
-          {/* Progress Steps Header */}
+          {/* Progress Steps */}
           <div className="flex justify-between items-center mb-8">
-            <div className={`flex-1 text-center border-b-2 pb-2 transition-colors ${step >= 1 ? 'border-black text-black font-semibold' : 'border-gray-200 text-gray-400'}`}>
-              <span className="hidden sm:inline">1. </span>Address
-            </div>
-            <div className={`flex-1 text-center border-b-2 pb-2 transition-colors ${step >= 2 ? 'border-black text-black font-semibold' : 'border-gray-200 text-gray-400'}`}>
-              <span className="hidden sm:inline">2. </span>Payment
-            </div>
-            <div className={`flex-1 text-center border-b-2 pb-2 transition-colors ${step >= 3 ? 'border-black text-black font-semibold' : 'border-gray-200 text-gray-400'}`}>
-              <span className="hidden sm:inline">3. </span>Review
-            </div>
+            {[["Address", 1], ["Payment", 2], ["Review", 3]].map(([label, s]) => (
+              <div
+                key={s}
+                className={`flex-1 text-center border-b-2 pb-2 transition-colors ${
+                  step >= s ? "border-black text-black font-semibold" : "border-gray-200 text-gray-400"
+                }`}
+              >
+                <span className="hidden sm:inline">{s}. </span>{label}
+              </div>
+            ))}
           </div>
 
-          {step === 1 && (!hasSavedAddress || isEditingAddress ? <AddressForm /> : <SavedAddressView />)}
-          {step === 2 && <PaymentMethodView />}
-          {step === 3 && <ReviewOrderView />}
+          {step === 1 && (!hasSavedAddress || isEditingAddress ? (
+            <AddressForm
+              shippingAddress={shippingAddress}
+              onChange={handleChange}
+              onSubmit={handleContinueToPayment}
+              hasSavedAddress={hasSavedAddress}
+              onCancel={() => setIsEditingAddress(false)}
+            />
+          ) : (
+            <SavedAddressView
+              shippingAddress={shippingAddress}
+              onEdit={() => setIsEditingAddress(true)}
+              onContinue={handleContinueToPayment}
+            />
+          ))}
+
+          {step === 2 && (
+            <PaymentMethodView
+              paymentMethod={paymentMethod}
+              onMethodChange={setPaymentMethod}
+              onBack={() => setStep(1)}
+              onContinue={() => setStep(3)}
+            />
+          )}
+
+          {step === 3 && (
+            <ReviewOrderView
+              shippingAddress={shippingAddress}
+              paymentMethod={paymentMethod}
+              creatingOrder={creatingOrder}
+              loading={loading}
+              cartItems={cartItems}
+              onBack={() => setStep(2)}
+              onPlaceOrder={handlePlaceOrder}
+              onEditStep={setStep}
+            />
+          )}
         </div>
 
+        {/* Order Summary Panel */}
         <div className="bg-white rounded-lg p-6 shadow sticky top-10 h-fit">
           <h3 className="text-xl font-semibold mb-4">Order Summary</h3>
 
@@ -501,7 +556,9 @@ const Checkout = () => {
                     <p className="font-medium text-sm sm:text-base">{product.name}</p>
                     <p className="text-gray-500 text-sm">Qty: {product.qty || 1}</p>
                   </div>
-                  <p className="font-medium text-sm sm:text-base">Rs {round2(Number(product.price || 0) * Number(product.qty || 1))}</p>
+                  <p className="font-medium text-sm sm:text-base">
+                    Rs {round2(Number(product.price || 0) * Number(product.qty || 1))}
+                  </p>
                 </div>
               ))
             )}
