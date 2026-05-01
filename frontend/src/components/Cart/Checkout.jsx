@@ -6,6 +6,7 @@ import { createOrder } from "../../redux/slices/orderSlice";
 import { clearCart } from "../../redux/slices/cartSlice";
 import { updateUserProfile, getUserProfile } from "../../redux/slices/authSlice";
 import { getImageUrl } from "../../utils/getImageUrl";
+import axiosInstance from "../../api/axiosConfig";
 
 const SHIPPING_COST = 50;
 
@@ -21,6 +22,7 @@ const Checkout = () => {
 
   const [step, setStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("COD");
+  const [loading, setLoading] = useState(false);
 
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [shippingAddress, setShippingAddress] = useState({
@@ -131,19 +133,34 @@ const Checkout = () => {
     setStep(2);
   };
 
- // frontend/src/components/Cart/Checkout.jsx (Modified handlePlaceOrder)
-const handlePlaceOrder = async () => {
-  try {
-    setLoading(true);
+  const handlePlaceOrder = async () => {
+    try {
+      setLoading(true);
 
-    // Step 1: Create order in DB
-    const order = await dispatch(createOrder(orderData)).unwrap();
+      const orderData = {
+        orderItems: cartItems,
+        shippingAddress,
+        paymentMethod,
+        itemsPrice: subtotal,
+        shippingPrice: SHIPPING_COST,
+        totalPrice: total,
+      };
 
-    // Step 2: Create Razorpay order
-    const paymentRes = await axiosInstance.post('/payment/create-razorpay-order', {
-      orderId: order._id,
-      amount: total,
-    });
+      // Step 1: Create order in DB
+      const order = await dispatch(createOrder(orderData)).unwrap();
+
+      if (paymentMethod === "COD") {
+        dispatch(clearCart());
+        toast.success("Order placed successfully!");
+        navigate(`/order-confirmation?orderId=${order._id}`);
+        return;
+      }
+
+      // Step 2: Create Razorpay order
+      const paymentRes = await axiosInstance.post('/payment/create-razorpay-order', {
+        orderId: order._id,
+        amount: total,
+      });
 
     const { razorpayOrderId, razorpayKeyId } = paymentRes.data;
 
@@ -435,10 +452,10 @@ const handlePlaceOrder = async () => {
         <button
           type="button"
           onClick={handlePlaceOrder}
-          disabled={creatingOrder || cartItems.length === 0}
+          disabled={creatingOrder || loading || cartItems.length === 0}
           className="w-2/3 bg-black text-white py-3 rounded hover:bg-gray-800 transition disabled:opacity-50"
         >
-          {creatingOrder ? "PROCESSING..." : "PLACE ORDER"}
+          {creatingOrder || loading ? "PROCESSING..." : "PLACE ORDER"}
         </button>
       </div>
     </div>
