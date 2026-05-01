@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #ee6c2b;
-  --color-background-light: #f8f6f6;
-  --color-background-dark: #221610;
+  --color-primary: #B25A38;
+  --color-background-light: #FBF9F6;
+  --color-background-dark: #2A2420;
   --font-display: "Plus Jakarta Sans", sans-serif;
   --radius-default: 0.5rem;
   --radius-lg: 1rem;

@@ -3,6 +3,8 @@ import { fileURLToPath } from "url";
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import session from "express-session";
 import passport from "passport";
 import { configurePassport } from "./config/passport.js";
@@ -16,11 +18,23 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import productAdminRoutes from "./routes/productAdminRoutes.js";
 import adminOrderRoutes from "./routes/adminOrderRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
+import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, ".env") });
+
+// Validate critical environment variables before anything else
+const requiredEnvVars = ["JWT_SECRET", "MONGO_URI", "SESSION_SECRET"];
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    throw new Error(`❌ Missing required environment variable: ${envVar}`);
+  }
+}
+
 connectDB();
 
 // Configure Passport
@@ -28,10 +42,44 @@ configurePassport();
 
 const app = express();
 
+// ═══════════════════════════════════════════════════════════════════
+// SECURITY MIDDLEWARE
+// ═══════════════════════════════════════════════════════════════════
+
+// Helmet: Set security HTTP headers
+app.use(helmet());
+
+// Rate Limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later",
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login attempts per windowMs
+  message: "Too many login attempts, please try again later",
+  skipSuccessfulRequests: true, // Don't count successful requests
+});
+
+// Apply rate limiters
+app.use("/api/", apiLimiter);
+app.use("/api/users/login", loginLimiter);
+app.use("/api/users/register", loginLimiter);
+
+// Body size limits
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
+// ═══════════════════════════════════════════════════════════════════
+
 // Session configuration
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "your-session-secret",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -48,7 +96,6 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
 
 // Passport middleware
 app.use(passport.initialize());
@@ -59,7 +106,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", googleAuthRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", checkoutRoutes);
+app.use('/api/payment', paymentRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/products", productAdminRoutes);
@@ -73,19 +122,14 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.resolve(__dirname, "../frontend", "dist", "index.html"));
   });
 }
- else {
+else {
   app.get("/", (req, res) => {
     res.send("Karigari backend is running");
   });
 }
 
-app.use((err, req, res, next) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  res.status(statusCode).json({
-    message: err.message || "Server error",
-    stack: process.env.NODE_ENV === "production" ? null : err.stack,
-  });
-});
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 if (process.env.VERCEL !== "1") {

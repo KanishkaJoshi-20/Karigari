@@ -7,8 +7,9 @@ export const fetchAdminProducts = createAsyncThunk(
   "admin/fetchProducts",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axiosInstance.get("/products");
-      return data;
+      // Pass a high limit for admin so we get all products
+      const { data } = await axiosInstance.get("/products?limit=1000");
+      return data.products || data;
     } catch (err) {
       return rejectWithValue(getErrorMessage(err));
     }

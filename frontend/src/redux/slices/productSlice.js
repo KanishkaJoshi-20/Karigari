@@ -40,6 +40,9 @@ const initialState = {
   productDetails: null,
   loading: false,
   error: null,
+  currentPage: 1,
+  totalPages: 1,
+  totalProducts: 0,
 };
 
 const productSlice = createSlice({
@@ -58,7 +61,15 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        // Check if paginated response or fallback to array
+        if (action.payload && action.payload.products) {
+          state.products = action.payload.products;
+          state.currentPage = action.payload.currentPage;
+          state.totalPages = action.payload.totalPages;
+          state.totalProducts = action.payload.totalProducts;
+        } else {
+          state.products = action.payload;
+        }
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;

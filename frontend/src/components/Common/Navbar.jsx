@@ -46,7 +46,7 @@ const Navbar = () => {
 
         {/* Right Icons */}
         <div className="flex items-center space-x-4">
-          <Link to='/collections/Wishlist' className='relative hover:text-black'>
+          <Link to='/wishlist' className='relative hover:text-black'>
             <Heart className='h-6 w-6 text-gray-700' />
             {wishlistCount > 0 && (
               <span className='absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold'>
@@ -75,9 +75,8 @@ const Navbar = () => {
       <CartDrawer drawerOpen={drawerOpen} toggleCartDrawer={toggleCartDrawer} />
 
       {/* Mobile navigation */}
-      <div className={`fixed top-0 left-0 w-3/4 sm:w-1/2 md:w-1/3 h-full bg-white shadow-lg transform transition-transform duration-300 z-50 ${
-        navDrawerOpen ? "translate-x-0" : "-translate-x-full"
-      }`}>
+      <div className={`fixed top-0 left-0 w-3/4 sm:w-1/2 md:w-1/3 h-full bg-white shadow-lg transform transition-transform duration-300 z-50 ${navDrawerOpen ? "translate-x-0" : "-translate-x-full"
+        }`}>
         <div className="flex justify-end p-4">
           <button onClick={toggleNavDrawer}>
             <X className='h-6 w-6 text-gray-600' />

@@ -1,10 +1,6 @@
 import User from "../models/user.js";
-import jwt from "jsonwebtoken";
-
-const generateToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET || "secret", {
-    expiresIn: "30d",
-  });
+import generateToken from "../utils/generateToken.js";
+import asyncHandler from "../middleware/asyncHandler.js";
 
 const userResponse = (user, token) => ({
   user: {
@@ -56,15 +52,11 @@ export const googleAuthCallback = async (req, res, next) => {
   }
 };
 
-export const getUserFromGoogle = async (req, res, next) => {
-  try {
-    if (!req.user) {
-      res.status(401);
-      throw new Error("Not authenticated");
-    }
-
-    res.json(userResponse(req.user, generateToken(req.user._id)));
-  } catch (error) {
-    next(error);
+export const getUserFromGoogle = asyncHandler(async (req, res, next) => {
+  if (!req.user) {
+    res.status(401);
+    throw new Error("Not authenticated");
   }
-};
+
+  res.json(userResponse(req.user, generateToken(req.user._id)));
+});

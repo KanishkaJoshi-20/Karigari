@@ -65,13 +65,18 @@ const orderSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    paidAt: {
+      type: Date,
+    },
+    paymentResult: {
+      razorpayOrderId: { type: String },
+      razorpayPaymentId: { type: String },
+      status: { type: String },
+    },
     isDelivered: {
       type: Boolean,
       required: true,
       default: false,
-    },
-    paidAt: {
-      type: Date,
     },
     deliveredAt: {
       type: Date,

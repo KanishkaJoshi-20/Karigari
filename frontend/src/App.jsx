@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchWishlist } from './redux/slices/wishlistSlice'
 import UserLayout from './components/Layout/UserLayout'
 import Home from './pages/Home'
 import { Toaster } from 'sonner'
@@ -8,6 +10,7 @@ import Register from './pages/Register'
 import Profile from './pages/Profile'
 import CollectionPage from './pages/CollectionPage'
 import ProductDetails from './components/Products/ProductDetails'
+import WishlistPage from './pages/WishlistPage'
 import Checkout from './components/Cart/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation'
 import OrderDetailPage from './pages/OrderDetailPage'
@@ -20,12 +23,23 @@ import AdminUsersPage from './pages/AdminUsersPage'
 import CustomCrochet from './pages/CustomCrochet'
 import AboutUs from './pages/AboutUs'
 import ContactUs from './pages/ContactUs'
-import AuthSuccess from './pages/AuthSuccess';
+import AuthSuccess from './pages/AuthSuccess'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function App() {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, user]);
+
   return (
-    <BrowserRouter> 
-      <Toaster position="top-right" />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Toaster position="top-right" />
       <Routes>
         <Route path='/' element={<UserLayout />}>
           <Route index element={<Home />} />
@@ -35,6 +49,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/collections/:collection" element={<CollectionPage />} />
           <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/order/:id" element={<OrderDetailPage />} />
@@ -51,6 +66,7 @@ function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 

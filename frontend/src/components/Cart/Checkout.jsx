@@ -40,6 +40,12 @@ const Checkout = () => {
       navigate("/login");
       return;
     }
+
+    // Load Razorpay script
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
   }, [user, navigate]);
 
   useEffect(() => {
@@ -125,42 +131,62 @@ const Checkout = () => {
     setStep(2);
   };
 
-  const handlePlaceOrder = async () => {
-    if (cartItems.length === 0) {
-      toast.error("Your cart is empty");
-      return;
-    }
+ // frontend/src/components/Cart/Checkout.jsx (Modified handlePlaceOrder)
+const handlePlaceOrder = async () => {
+  try {
+    setLoading(true);
 
-    const orderData = {
-      orderItems: cartItems.map((item) => ({
-        name: item.name,
-        qty: Number(item.qty || 1),
-        image: item.image,
-        price: Number(item.price || 0),
-        product: item.product,
-      })),
-      shippingAddress: {
-        address: shippingAddress.address,
-        city: shippingAddress.city,
-        postalCode: shippingAddress.postalCode,
-        country: shippingAddress.country,
+    // Step 1: Create order in DB
+    const order = await dispatch(createOrder(orderData)).unwrap();
+
+    // Step 2: Create Razorpay order
+    const paymentRes = await axiosInstance.post('/payment/create-razorpay-order', {
+      orderId: order._id,
+      amount: total,
+    });
+
+    const { razorpayOrderId, razorpayKeyId } = paymentRes.data;
+
+    // Step 3: Open Razorpay modal
+    const options = {
+      key: razorpayKeyId,
+      amount: total * 100, // in paise
+      currency: 'INR',
+      name: 'Karigari',
+      description: `Order ${order._id}`,
+      order_id: razorpayOrderId,
+      handler: async (response) => {
+        // Step 4: Verify payment
+        try {
+          const verifyRes = await axiosInstance.post('/payment/verify-payment', {
+            razorpayOrderId,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+            orderId: order._id,
+          });
+
+          // Payment successful
+          dispatch(clearCart());
+          toast.success('Payment successful!');
+          navigate(`/order-confirmation?orderId=${order._id}`);
+        } catch (error) {
+          toast.error('Payment verification failed');
+        }
       },
-      paymentMethod,
-      itemsPrice: subtotal,
-      shippingPrice: SHIPPING_COST,
-      totalPrice: total,
+      prefill: {
+        email: user.email,
+        contact: user.phone,
+      },
     };
 
-    try {
-      const order = await dispatch(createOrder(orderData)).unwrap();
-      dispatch(clearCart());
-      toast.success("Order placed successfully");
-      navigate(`/order-confirmation?orderId=${order._id}`);
-    } catch (error) {
-      console.error("Create order failed:", error);
-      toast.error(error || "Failed to place order");
-    }
-  };
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+  } catch (error) {
+    toast.error(error?.message || 'Failed to place order');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const AddressForm = () => (
     <form onSubmit={handleContinueToPayment} className="space-y-4">
