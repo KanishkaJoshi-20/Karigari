@@ -12,11 +12,20 @@ const Footer = () => {
           <h3 className="font-semibold text-lg mb-4">Categories</h3>
           <ul className="space-y-2 text-sm">
             <li><Link to="/collections/all" className="hover:text-gray-900">All Products</Link></li>
-            <li><Link to="/collections/all" className="hover:text-gray-900">Amigurumi Toys</Link></li>
-            <li><Link to="/collections/all" className="hover:text-gray-900">Home Décor</Link></li>
-            <li><Link to="/collections/all" className="hover:text-gray-900">Accessories</Link></li>
-            <li><Link to="/collections/all" className="hover:text-gray-900">Baby Essentials</Link></li>
-            <li><Link to="/collections/all" className="hover:text-gray-900">Gift Sets</Link></li>
+            <li><Link to="/collections/hair clip" className="hover:text-gray-900">Hair Clip</Link></li>
+            <li><Link to="/collections/claw clips" className="hover:text-gray-900">Claw Clips</Link></li>
+            <li><Link to="/collections/keychains" className="hover:text-gray-900">Keychains</Link></li>
+            <li><Link to="/collections/bookmarker" className="hover:text-gray-900">Bookmarker</Link></li>
+            <li><Link to="/collections/bag charm" className="hover:text-gray-900">Bag Charm</Link></li>
+            <li><Link to="/collections/earpod case" className="hover:text-gray-900">Earpod Case</Link></li>
+            <li><Link to="/collections/hair accessories" className="hover:text-gray-900">Hair Accessories</Link></li>
+            <li><Link to="/collections/purse" className="hover:text-gray-900">Purse</Link></li>
+            <li><Link to="/collections/top" className="hover:text-gray-900">Top</Link></li>
+            <li><Link to="/collections/poshak" className="hover:text-gray-900">Poshak</Link></li>
+            <li><Link to="/collections/earrings" className="hover:text-gray-900">Earrings</Link></li>
+            <li><Link to="/collections/flower pot" className="hover:text-gray-900">Flower Pot</Link></li>
+            <li><Link to="/collections/specs holder" className="hover:text-gray-900">Specs Holder</Link></li>
+            <li><Link to="/collections/rubber bands" className="hover:text-gray-900">Rubber Bands</Link></li>
           </ul>
         </div>
 

@@ -15,7 +15,7 @@ const EMPTY_FORM = {
   name: "",
   price: "",
   description: "",
-  category: "Handmade",
+  category: "Hair Clip",
   brand: "Karigari",
   countInStock: "",
   image: "",
@@ -138,12 +138,20 @@ const AdminProductsPage = () => {
 
             <label className="block mb-1 text-sm font-medium">Category</label>
             <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full border p-2 rounded mb-3">
-              <option>Handmade</option>
-              <option>Amigurumi Toys</option>
-              <option>Home Décor</option>
-              <option>Accessories</option>
-              <option>Baby Essentials</option>
-              <option>Gift Sets</option>
+              <option>Hair Clip</option>
+              <option>Claw Clips</option>
+              <option>Keychains</option>
+              <option>Bookmarker</option>
+              <option>Bag Charm</option>
+              <option>Earpod Case</option>
+              <option>Hair Accessories</option>
+              <option>Purse</option>
+              <option>Top</option>
+              <option>Poshak</option>
+              <option>Earrings</option>
+              <option>Flower Pot</option>
+              <option>Specs Holder</option>
+              <option>Rubber Bands</option>
             </select>
 
             <label className="block mb-1 text-sm font-medium">Description</label>

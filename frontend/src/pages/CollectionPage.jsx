@@ -12,11 +12,20 @@ import Pagination from "../components/Common/Pagination";
 
 const COLLECTIONS = [
   "All",
-  "Amigurumi Toys",
-  "Home Décor",
-  "Accessories",
-  "Baby Essentials",
-  "Gift Sets",
+  "Hair Clip",
+  "Claw Clips",
+  "Keychains",
+  "Bookmarker",
+  "Bag Charm",
+  "Earpod Case",
+  "Hair Accessories",
+  "Purse",
+  "Top",
+  "Poshak",
+  "Earrings",
+  "Flower Pot",
+  "Specs Holder",
+  "Rubber Bands",
   "Wishlist"
 ];
 
