@@ -20,6 +20,7 @@ import productAdminRoutes from "./routes/productAdminRoutes.js";
 import adminOrderRoutes from "./routes/adminOrderRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import sendEmail from "./utils/sendEmail.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -127,6 +128,23 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/admin/products", productAdminRoutes);
 app.use("/api/admin/orders", adminOrderRoutes);
 
+// ─── DEV/DEBUG: Test Email Route ────────────────────────────────────────────
+// Hit GET /api/test-email?to=youremail@gmail.com to verify email works on Render
+app.get("/api/test-email", async (req, res) => {
+  const to = req.query.to || process.env.EMAIL_USER;
+  try {
+    await sendEmail({
+      to,
+      subject: "Karigari — Test Email ✅",
+      html: `<p>If you're seeing this, email is working correctly on <strong>${process.env.NODE_ENV}</strong>.</p>`,
+    });
+    res.json({ success: true, message: `Test email sent to ${to}` });
+  } catch (err) {
+    console.error("[Email Test] Error:", err);
+    res.status(500).json({ success: false, error: err.message, code: err.code });
+  }
+});
+
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
@@ -134,8 +152,7 @@ if (process.env.NODE_ENV === "production") {
   app.get(/^\/(?!api).*/, (req, res) => {
     res.sendFile(path.resolve(__dirname, "../frontend", "dist", "index.html"));
   });
-}
-else {
+} else {
   app.get("/", (req, res) => {
     res.send("Karigari backend is running");
   });

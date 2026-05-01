@@ -1,45 +1,49 @@
 import nodemailer from "nodemailer";
 
 /**
- * Creates a configured Nodemailer transporter.
- * Falls back gracefully if credentials are missing (dev mode).
- */
-const createTransporter = () => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.warn("[Email] EMAIL_USER or EMAIL_PASS not set — email disabled.");
-    return null;
-  }
-
-  return nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS, // Use Gmail App Password, NOT your account password
-    },
-  });
-};
-
-/**
- * Sends an email.
+ * Sends an email using Nodemailer via Gmail App Password.
+ * Logs detailed errors to help with debugging on Render.
+ *
  * @param {Object} options
  * @param {string} options.to       - Recipient email address
  * @param {string} options.subject  - Email subject
  * @param {string} options.html     - HTML email body
  */
 const sendEmail = async ({ to, subject, html }) => {
-  const transporter = createTransporter();
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASS;
 
-  if (!transporter) return; // Silently skip if email is not configured
+  if (!user || !pass) {
+    console.warn("[Email] Skipped — EMAIL_USER or EMAIL_PASS not set in environment.");
+    return;
+  }
 
-  const mailOptions = {
-    from: `"Karigari by Nisha" <${process.env.EMAIL_USER}>`,
+  console.log(`[Email] Attempting to send to: ${to}`);
+  console.log(`[Email] Using sender: ${user}`);
+
+  // Create a fresh transporter each time (avoids stale connection issues on Render)
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // Use SSL
+    auth: {
+      user,
+      pass,
+    },
+  });
+
+  // Verify connection before sending
+  await transporter.verify();
+  console.log("[Email] SMTP connection verified ✅");
+
+  const info = await transporter.sendMail({
+    from: `"Karigari by Nisha" <${user}>`,
     to,
     subject,
     html,
-  };
+  });
 
-  const info = await transporter.sendMail(mailOptions);
-  console.log(`[Email] Sent to ${to} — MessageId: ${info.messageId}`);
+  console.log(`[Email] ✅ Sent successfully to ${to} — MessageId: ${info.messageId}`);
 };
 
 export default sendEmail;
