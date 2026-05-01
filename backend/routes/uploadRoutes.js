@@ -12,7 +12,7 @@ router.post("/", protect, admin, upload.single("image"), (req, res) => {
   // Cloudinary stores the file's secure URL in req.file.path
   res.status(201).json({
     message: "Image uploaded successfully",
-    image: req.file.path,
+    image: req.file.path || req.file.secure_url || req.file.url,
   });
 });
 
