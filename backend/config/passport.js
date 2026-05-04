@@ -13,9 +13,9 @@ export const configurePassport = () => {
       async (accessToken, refreshToken, profile, done) => {
         try {
           // Get email - handle different email formats
-          const email = profile.emails && profile.emails.length > 0 
+          const email = (profile.emails && profile.emails.length > 0 
             ? profile.emails[0].value 
-            : profile._json?.email || profile.email;
+            : profile._json?.email || profile.email)?.toLowerCase();
 
           if (!email) {
             return done(
