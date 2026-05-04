@@ -16,8 +16,8 @@ const Topbar = () => {
                     <Instagram className='h-5 w-5'/>
                 </a>
             </div>
-            <div className='text-sm text-center flex-grow'>
-                <span>Karigari By Nisha Khitoliya | Crochet Artist </span>
+            <div className='text-sm text-center flex-grow px-4'>
+                <span className='block truncate'>Karigari By Nisha Khitoliya | Crochet Artist</span>
             </div>
             <div className='text-sm hidden md:block'>
                 <a href="tel:+917803963389" className='hover:text-gray-300'>+91 7803963389</a>

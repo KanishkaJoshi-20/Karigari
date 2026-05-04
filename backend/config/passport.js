@@ -12,6 +12,7 @@ export const configurePassport = () => {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
+          const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
           // Get email - handle different email formats
           const email = (profile.emails && profile.emails.length > 0 
             ? profile.emails[0].value 
@@ -42,6 +43,7 @@ export const configurePassport = () => {
               oauthProvider: "google",
               profilePicture: picture,
               password: null,
+              isAdmin: email === adminEmail,
             });
           } else {
             // Update GoogleId if user previously registered with email

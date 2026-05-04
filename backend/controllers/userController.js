@@ -3,6 +3,8 @@ import generateToken from "../utils/generateToken.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
 // Helper to build user response object (includes address fields)
+const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+
 const userResponse = (user, token) => ({
   user: {
     _id: user._id,
@@ -33,7 +35,8 @@ export const registerUser = asyncHandler(async (req, res, next) => {
     throw new Error("User already exists");
   }
 
-  const user = await User.create({ name, email, password });
+  const isAdmin = email.toLowerCase() === adminEmail;
+  const user = await User.create({ name, email, password, isAdmin });
 
   res.status(201).json(userResponse(user, generateToken(user._id)));
 });

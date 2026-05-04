@@ -11,7 +11,7 @@ function ProductGrid({ products }) {
       {products.map((product) => (
         <Link key={product._id} to={`/product/${product._id}`} className='block'>
           <div className="bg-white p-4 rounded-lg hover:shadow-md transition">
-            <div className="w-full h-96 mb-4">
+            <div className="w-full aspect-[4/5] mb-4 overflow-hidden rounded-lg bg-slate-100">
               <img
                 src={getImageUrl(product.image || product.images?.[0]?.url)}
                 alt={product.name}

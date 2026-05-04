@@ -21,6 +21,7 @@ import AdminProductsPage from './pages/AdminProductsPage'
 import AdminOrdersPage from './pages/AdminOrdersPage'
 import AdminUsersPage from './pages/AdminUsersPage'
 import CustomCrochet from './pages/CustomCrochet'
+import GiftBuilder from './pages/GiftBuilder'
 import AboutUs from './pages/AboutUs'
 import ContactUs from './pages/ContactUs'
 import AuthSuccess from './pages/AuthSuccess'
@@ -55,6 +56,7 @@ function App() {
           <Route path="/order/:id" element={<OrderDetailPage />} />
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/custom-crochet" element={<CustomCrochet />} />
+          <Route path="/gift-builder" element={<GiftBuilder />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<ContactUs />} />
         </Route>

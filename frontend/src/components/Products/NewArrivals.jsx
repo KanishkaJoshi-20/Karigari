@@ -91,13 +91,15 @@ function NewArrivals({ products = [], loading = false }) {
         className={`container mx-auto overflow-x-scroll flex space-x-6 relative ${isDragging ? 'cursor-grabbing' : 'cursor-grab' }`}>
             {loading ? ( <p className="text-center w-full py-10">Loading Products...</p> ) : products.map((product) => (
                 <div key={product._id} 
-                className="min-w-full sm:min-w-[50%] lg:min-w-[30%] relative ">
+                className="min-w-[90%] sm:min-w-[48%] lg:min-w-[30%] relative ">
                     <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                        <img 
-                        src={getImageUrl(product.image || product.images?.[0]?.url)} 
-                        alt={product.name} 
-                        draggable="false"
-                        className="w-118 h-128 object-cover rounded-lg hover:scale-105 transition-transform duration-300" />
+                        <div className="aspect-[4/5] overflow-hidden">
+                          <img 
+                            src={getImageUrl(product.image || product.images?.[0]?.url)} 
+                            alt={product.name} 
+                            draggable="false"
+                            className="w-full h-full object-cover rounded-lg hover:scale-105 transition-transform duration-300" />
+                        </div>
 
                         <div className="absolute bottom-0 left-0 right-0 bg-opacity-75 backdrop-blur-md text-white p-4 rounded-b-lg">
                             <Link to={`/product/${product._id}`} className='block'>

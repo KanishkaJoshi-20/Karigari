@@ -1,6 +1,6 @@
 import { ShoppingBag, User, X, Menu, Heart } from 'lucide-react'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import SearchBar from './SearchBar'
 import CartDrawer from '../Layout/CartDrawer'
@@ -13,10 +13,19 @@ const navLinkClass = `text-gray-700 text-sm font-medium uppercase
 const Navbar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [navDrawerOpen, setNavDrawerOpen] = useState(false);
+  const location = useLocation();
 
   const { user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.cart);
   const { wishlistItems } = useSelector((state) => state.wishlist);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const timeout = setTimeout(() => {
+      setDrawerOpen(false);
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [location.pathname, drawerOpen]);
 
   const cartCount = cartItems.reduce((acc, item) => acc + (item.qty || 1), 0);
   const wishlistCount = wishlistItems?.length || 0;
@@ -37,6 +46,7 @@ const Navbar = () => {
           <Link to='/' className={navLinkClass}>Home</Link>
           <Link to='/collections/all' className={navLinkClass}>Collections</Link>
           <Link to='/custom-crochet' className={navLinkClass}>Custom Crochet</Link>
+          <Link to='/gift-builder' className={navLinkClass}>Gift Builder</Link>
           <Link to='/about' className={navLinkClass}>About Us</Link>
           <Link to='/contact' className={navLinkClass}>Contact Us</Link>
           {user && user.isAdmin && (
@@ -88,6 +98,7 @@ const Navbar = () => {
             <Link to='/' onClick={toggleNavDrawer} className='block text-gray-600 hover:text-black'>Home</Link>
             <Link to='/collections/all' onClick={toggleNavDrawer} className='block text-gray-600 hover:text-black'>Collections</Link>
             <Link to='/custom-crochet' onClick={toggleNavDrawer} className='block text-gray-600 hover:text-black'>Custom Crochet</Link>
+            <Link to='/gift-builder' onClick={toggleNavDrawer} className='block text-gray-600 hover:text-black'>Gift Builder</Link>
             <Link to='/about' onClick={toggleNavDrawer} className='block text-gray-600 hover:text-black'>About Us</Link>
             <Link to='/contact' onClick={toggleNavDrawer} className='block text-gray-600 hover:text-black'>Contact Us</Link>
             {user && user.isAdmin && (
