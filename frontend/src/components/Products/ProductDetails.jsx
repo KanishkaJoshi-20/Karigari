@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductDetails, fetchProducts } from '../../redux/slices/productSlice';
-import { addToCartAsync } from '../../redux/slices/cartSlice';
+import { addToCart } from '../../redux/slices/cartSlice';
 
 import ProductGallery from '../product/ProductGallery';
 import ProductInfo from '../product/ProductInfo';
@@ -50,9 +50,13 @@ function ProductDetails() {
     const handleAddToCart = () => {
         if (!product) return;
 
-        dispatch(addToCartAsync({
-            productId: product._id,
-            quantity: 1
+        dispatch(addToCart({
+            product: product._id,
+            name: product.name,
+            image: product.image,
+            price: product.price,
+            qty: 1, // Defaulting to 1 to match the static screenshot design perfectly
+            countInStock: product.countInStock || 10
         }));
 
         setIsButtonDisabled(true);

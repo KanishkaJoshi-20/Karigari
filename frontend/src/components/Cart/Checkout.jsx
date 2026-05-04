@@ -351,7 +351,7 @@ const Checkout = () => {
     () =>
       round2(
         cartItems.reduce(
-          (acc, item) => acc + Number(item.product.price || 0) * Number(item.quantity),
+          (acc, item) => acc + Number(item.price || 0) * Number(item.qty || 1),
           0
         )
       ),
@@ -419,13 +419,7 @@ const Checkout = () => {
       setLoading(true);
 
       const orderData = {
-        orderItems: cartItems.map(item => ({
-          name: item.product.name,
-          qty: item.quantity,
-          image: item.product.image,
-          price: item.product.price,
-          product: item.product._id
-        })),
+        orderItems: cartItems,
         shippingAddress,
         paymentMethod,
         itemsPrice: subtotal,
@@ -551,19 +545,19 @@ const Checkout = () => {
             {cartItems.length === 0 ? (
               <p className="text-gray-400 text-center py-4">Your cart is empty</p>
             ) : (
-              cartItems.map((item) => (
-                <div key={item._id} className="flex items-center gap-4">
+              cartItems.map((product) => (
+                <div key={product.product} className="flex items-center gap-4">
                   <img
-                    src={getImageUrl(item.product.image)}
-                    alt={item.product.name}
+                    src={getImageUrl(product.image)}
+                    alt={product.name}
                     className="w-20 h-20 object-cover rounded"
                   />
                   <div className="flex-1">
-                    <p className="font-medium text-sm sm:text-base">{item.product.name}</p>
-                    <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
+                    <p className="font-medium text-sm sm:text-base">{product.name}</p>
+                    <p className="text-gray-500 text-sm">Qty: {product.qty || 1}</p>
                   </div>
                   <p className="font-medium text-sm sm:text-base">
-                    Rs {round2(Number(item.product.price || 0) * Number(item.quantity))}
+                    Rs {round2(Number(product.price || 0) * Number(product.qty || 1))}
                   </p>
                 </div>
               ))

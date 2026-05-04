@@ -24,7 +24,7 @@ const Navbar = () => {
     setDrawerOpen(false);
   }, [location.pathname]);
 
-  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const cartCount = cartItems.reduce((acc, item) => acc + (item.qty || 1), 0);
   const wishlistCount = wishlistItems?.length || 0;
 
   const toggleNavDrawer = () => setNavDrawerOpen(!navDrawerOpen);

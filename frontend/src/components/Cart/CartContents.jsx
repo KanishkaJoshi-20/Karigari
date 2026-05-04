@@ -1,19 +1,19 @@
 import { Trash } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
-import { removeFromCartAsync, addToCartAsync } from '../../redux/slices/cartSlice';
+import { removeFromCart, addToCart } from '../../redux/slices/cartSlice';
 import { getImageUrl } from '../../utils/getImageUrl';
 
 const CartContents = () => {
     const dispatch = useDispatch();
     const { cartItems: cartProducts } = useSelector((state) => state.cart);
 
-    const handleRemove = (itemId) => {
-        dispatch(removeFromCartAsync(itemId));
+    const handleRemove = (id) => {
+        dispatch(removeFromCart(id));
     };
 
-    const updateQuantity = (item, newQty) => {
+    const updateQuantity = (product, newQty) => {
         if (newQty < 1) return;
-        dispatch(addToCartAsync({ productId: item.product._id, quantity: newQty - item.quantity }));
+        dispatch(addToCart({ ...product, qty: newQty }));
     };
 
     return (
@@ -21,32 +21,32 @@ const CartContents = () => {
             {cartProducts.length === 0 ? (
                 <p className="p-4 text-gray-400">Your cart is empty.</p>
             ) : (
-                cartProducts.map((item) => (
+                cartProducts.map((product) => (
                     <div
-                        key={item._id}
+                        key={product.product}
                         className="flex items-start justify-between py-4 border-b"
                     >
                         <div className="flex items-start">
                             <img
-                                src={getImageUrl(item.product.image)}
-                                alt={item.product.name}
+                                src={getImageUrl(product.image)}
+                                alt={product.name}
                                 className="h-24 w-20 object-cover mr-4 rounded"
                             />
                             <div className="flex flex-col">
-                                <h3 className="font-medium">{item.product.name}</h3>
+                                <h3 className="font-medium">{product.name}</h3>
                                 <p className="text-sm text-gray-500">
-                                    ₹{item.product.price}
+                                    ₹{product.price}
                                 </p>
                                 <div className="flex items-center mt-2">
                                     <button
-                                        onClick={() => updateQuantity(item, item.quantity - 1)}
+                                        onClick={() => updateQuantity(product, (product.qty || 1) - 1)}
                                         className="border rounded px-2 py-1 text-xl font-medium"
                                     >
                                         -
                                     </button>
-                                    <span className="mx-4">{item.quantity}</span>
+                                    <span className="mx-4">{product.qty || 1}</span>
                                     <button
-                                        onClick={() => updateQuantity(item, item.quantity + 1)}
+                                        onClick={() => updateQuantity(product, (product.qty || 1) + 1)}
                                         className="border rounded px-2 py-1 text-xl font-medium"
                                     >
                                         +
@@ -55,8 +55,8 @@ const CartContents = () => {
                             </div>
                         </div>
                         <div className="text-right">
-                            <p className="font-medium">₹{(item.product.price * item.quantity).toLocaleString()}</p>
-                            <button onClick={() => handleRemove(item._id)}>
+                            <p className="font-medium">₹{(product.price * (product.qty || 1)).toLocaleString()}</p>
+                            <button onClick={() => handleRemove(product.product)}>
                                 <Trash className="h-5 w-5 mt-2 text-red-600 hover:text-red-800" />
                             </button>
                         </div>

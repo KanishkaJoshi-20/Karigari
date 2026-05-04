@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../redux/slices/productSlice";
 import { motion } from "framer-motion";
-import { addToCartAsync } from "../redux/slices/cartSlice";
+import { addToCart } from "../redux/slices/cartSlice";
 import { toggleWishlist } from "../redux/slices/wishlistSlice";
 import { toast } from "sonner";
 import { FaFilter, FaTimes } from "react-icons/fa";
@@ -74,9 +74,13 @@ const CollectionPage = () => {
   };
 
   const handleAddToCart = (product) => {
-    dispatch(addToCartAsync({
-      productId: product._id,
-      quantity: 1
+    dispatch(addToCart({
+      product: product._id,
+      name: product.name,
+      image: getImageUrl(product.image || product.images?.[0]?.url),
+      price: product.price,
+      qty: 1,
+      countInStock: product.countInStock || 10
     }));
     toast.success('Product Added To Cart', { duration: 1000 });
   };
