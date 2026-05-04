@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { logout } from "./authSlice";
 
 const cartItemsFromStorage = localStorage.getItem("cartItems")
   ? JSON.parse(localStorage.getItem("cartItems"))
@@ -38,6 +39,12 @@ const cartSlice = createSlice({
       state.cartItems = [];
       localStorage.removeItem("cartItems");
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(logout, (state) => {
+      state.cartItems = [];
+      localStorage.removeItem("cartItems");
+    });
   },
 });
 

@@ -2,12 +2,13 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout, getUserProfile } from "../redux/slices/authSlice";
+import { clearCart } from "../redux/slices/cartSlice";
 import MyOrders from "./MyOrderPage";
 
 const Profile = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, loading } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (!user) {
@@ -19,10 +20,11 @@ const Profile = () => {
     if (user) {
       dispatch(getUserProfile());
     }
-  }, [dispatch]);
+  }, [dispatch, user]);
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(clearCart());
     navigate("/login");
   };
 
