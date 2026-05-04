@@ -21,11 +21,8 @@ const Navbar = () => {
 
   useEffect(() => {
     if (!drawerOpen) return;
-    const timeout = setTimeout(() => {
-      setDrawerOpen(false);
-    }, 0);
-    return () => clearTimeout(timeout);
-  }, [location.pathname, drawerOpen]);
+    setDrawerOpen(false);
+  }, [location.pathname]);
 
   const cartCount = cartItems.reduce((acc, item) => acc + (item.qty || 1), 0);
   const wishlistCount = wishlistItems?.length || 0;
