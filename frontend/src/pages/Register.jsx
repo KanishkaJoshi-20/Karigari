@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser } from "../redux/slices/authSlice";
+import { registerUser, getUserProfile } from "../redux/slices/authSlice";
+import { fetchCart } from "../redux/slices/cartSlice";
 import { toast } from "sonner";
 import loginImage from "../assets/Login-image.jpeg";
 import GoogleLoginButton from "../components/Auth/GoogleLoginButton";
@@ -43,6 +44,11 @@ const Register = () => {
           _id: "",
         })
       );
+
+      // Fetch full profile and cart
+      dispatch(getUserProfile()).then(() => {
+        dispatch(fetchCart());
+      });
 
       window.history.replaceState({}, document.title, window.location.pathname);
       navigate("/");

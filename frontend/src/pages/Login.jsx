@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import loginImage from "../assets/Login-image.jpeg";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../redux/slices/authSlice";
+import { loginUser, getUserProfile } from "../redux/slices/authSlice";
+import { fetchCart } from "../redux/slices/cartSlice";
 import GoogleLoginButton from "../components/Auth/GoogleLoginButton";
 import { toast } from "sonner";
 
@@ -17,9 +18,13 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
+      // Fetch latest profile and cart data
+      dispatch(getUserProfile()).then(() => {
+        dispatch(fetchCart());
+      });
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [user, navigate, dispatch]);
 
   // Handle OAuth redirect callback
   useEffect(() => {
@@ -40,6 +45,11 @@ const Login = () => {
           _id: "", // Will be fetched from profile
         })
       );
+
+      // Fetch full user profile and cart
+      dispatch(getUserProfile()).then(() => {
+        dispatch(fetchCart());
+      });
 
       // Clear the URL
       window.history.replaceState({}, document.title, window.location.pathname);

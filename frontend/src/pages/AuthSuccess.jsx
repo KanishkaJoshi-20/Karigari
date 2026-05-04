@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { setGoogleUser } from "../redux/slices/authSlice"; // ✅ Import the action
+import { setGoogleUser, getUserProfile } from "../redux/slices/authSlice";
+import { fetchCart } from "../redux/slices/cartSlice";
 
 const AuthSuccess = () => {
   const navigate = useNavigate();
@@ -22,6 +23,11 @@ const AuthSuccess = () => {
         // Dispatch Redux action with user data
         const userData = { email, name, _id: "" };
         dispatch(setGoogleUser(userData)); // ✅ Use the action
+
+        // Fetch full profile and cart
+        dispatch(getUserProfile()).then(() => {
+          dispatch(fetchCart());
+        });
 
         toast.success("Welcome! You're now logged in.");
         
