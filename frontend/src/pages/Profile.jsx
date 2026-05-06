@@ -18,10 +18,10 @@ const Profile = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    if (user) {
+    if (user?._id) {
       dispatch(getUserProfile());
     }
-  }, [dispatch, user]);
+  }, [dispatch, user?._id]);
 
   const handleLogout = () => {
     dispatch(logout());

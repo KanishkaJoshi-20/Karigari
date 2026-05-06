@@ -17,8 +17,10 @@ const MyOrders = () => {
       navigate("/login");
       return;
     }
-    dispatch(getMyOrders());
-  }, [dispatch, user, navigate]);
+    if (user?._id) {
+      dispatch(getMyOrders());
+    }
+  }, [dispatch, user?._id, navigate]);
 
   if (myOrdersLoading) {
     return (
