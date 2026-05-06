@@ -1,28 +1,45 @@
-import { Instagram, MessageCircle, Zap } from 'lucide-react'
+import { FaInstagram, FaWhatsapp } from 'react-icons/fa'
 import React from 'react'
 
 const Topbar = () => {
   return (
-    <div className='bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 text-white'>
-        <div className='container mx-auto flex justify-between items-center py-2 px-4'>
-            <div className='hidden md:flex items-center space-x-4'>
-                <a href="#" className='hover:text-gray-300'>
-                    <Zap className='h-5 w-5'/>
-                </a>
-                <a href="#" className='hover:text-gray-300'>
-                    <MessageCircle className='h-5 w-5'/>
-                </a>
-                <a href="#" className='hover:text-gray-300'>
-                    <Instagram className='h-5 w-5'/>
-                </a>
-            </div>
-            <div className='text-sm text-center flex-grow px-4'>
-                <span className='block truncate'>Karigari By Nisha Khitoliya | Crochet Artist</span>
-            </div>
-            <div className='text-sm hidden md:block'>
-                <a href="tel:+917803963389" className='hover:text-gray-300'>+91 7803963389</a>
-            </div>
+    <div className='bg-[#2A2420] text-white/80 text-xs'>
+      <div className='container mx-auto flex justify-between items-center py-2 px-6'>
+        {/* Left: social icons */}
+        <div className='flex items-center gap-3'>
+          <a
+            href="https://instagram.com/karigari.crochet"
+            target="_blank"
+            rel="noopener noreferrer"
+            className='hover:text-white transition-colors'
+            aria-label="Instagram"
+          >
+            <FaInstagram className='h-3.5 w-3.5' />
+          </a>
+          <a
+            href="https://wa.me/917803963389"
+            target="_blank"
+            rel="noopener noreferrer"
+            className='hover:text-white transition-colors'
+            aria-label="WhatsApp"
+          >
+            <FaWhatsapp className='h-3.5 w-3.5' />
+          </a>
         </div>
+
+        {/* Center: brand tagline */}
+        <span className='text-center tracking-wide text-white/70'>
+          Karigari By Nisha Khitoliya &nbsp;·&nbsp; Handcrafted Crochet
+        </span>
+
+        {/* Right: phone */}
+        <a
+          href="tel:+917803963389"
+          className='hover:text-white transition-colors hidden md:block'
+        >
+          +91 7803963389
+        </a>
+      </div>
     </div>
   )
 }
