@@ -52,7 +52,8 @@ export const getMyOrders = createAsyncThunk(
 const initialState = {
   orders: [],
   orderDetails: null,
-  loading: false,
+  loading: false,         // used by createOrder + getOrderDetails
+  myOrdersLoading: false, // dedicated flag for getMyOrders — prevents shared-loading bug
   error: null,
 };
 
@@ -92,17 +93,17 @@ const orderSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Get My Orders
+      // Get My Orders — uses its OWN loading flag
       .addCase(getMyOrders.pending, (state) => {
-        state.loading = true;
+        state.myOrdersLoading = true;
         state.error = null;
       })
       .addCase(getMyOrders.fulfilled, (state, action) => {
-        state.loading = false;
+        state.myOrdersLoading = false;
         state.orders = action.payload;
       })
       .addCase(getMyOrders.rejected, (state, action) => {
-        state.loading = false;
+        state.myOrdersLoading = false;
         state.error = action.payload;
       });
   },
